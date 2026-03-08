@@ -8,6 +8,7 @@ import {
   RUN_LOAN_PROVISIONING,
 } from "@/lib/graphql/queries";
 import {
+  ArrowLeft,
   Clock,
   Play,
   CheckCircle,
@@ -18,6 +19,7 @@ import {
   Settings,
   X,
 } from "lucide-react";
+import Link from "next/link";
 
 interface BatchJob {
   id: string;
@@ -106,6 +108,9 @@ export default function EndOfDayPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
+        <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+        </Link>
         <div className="p-3 bg-blue-500/10 rounded-lg">
           <Clock className="w-6 h-6 text-blue-600" />
         </div>

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_LOAN_PROVISION_REPORT } from "@/lib/graphql/queries";
 import { formatCurrency } from "@/lib/utils";
-import { ShieldAlert, Calendar, Printer, Download } from "lucide-react";
+import { ArrowLeft, ShieldAlert, Calendar, Printer, Download } from "lucide-react";
+import Link from "next/link";
 
 const classificationColors: Record<string, string> = {
   CURRENT: "bg-green-100 text-green-800",
@@ -29,6 +30,9 @@ export default function LoanProvisioningPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
           <div className="p-3 bg-orange-500/10 rounded-lg">
             <ShieldAlert className="w-6 h-6 text-orange-600" />
           </div>

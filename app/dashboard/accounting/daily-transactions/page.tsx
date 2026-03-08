@@ -5,6 +5,7 @@ import { useQuery } from "@apollo/client";
 import { GET_DAILY_TRANSACTION_SUMMARY } from "@/lib/graphql/queries";
 import { formatCurrency } from "@/lib/utils";
 import {
+  ArrowLeft,
   BarChart3,
   Calendar,
   ArrowDownCircle,
@@ -13,6 +14,7 @@ import {
   Banknote,
   Hash,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function DailyTransactionsPage() {
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -64,6 +66,9 @@ export default function DailyTransactionsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
+        <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+        </Link>
         <div className="p-3 bg-violet-500/10 rounded-lg">
           <BarChart3 className="w-6 h-6 text-violet-600" />
         </div>

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_TRIAL_BALANCE } from "@/lib/graphql/queries";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Scale, Calendar, Printer, Download, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Scale, Calendar, Printer, Download, CheckCircle, XCircle } from "lucide-react";
+import Link from "next/link";
 
 export default function TrialBalancePage() {
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -29,6 +30,9 @@ export default function TrialBalancePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
           <div className="p-3 bg-purple-500/10 rounded-lg">
             <Scale className="w-6 h-6 text-purple-600" />
           </div>

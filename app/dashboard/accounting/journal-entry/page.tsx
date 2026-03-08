@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_CHART_OF_ACCOUNTS, POST_JOURNAL_ENTRY } from "@/lib/graphql/queries";
 import { formatCurrency } from "@/lib/utils";
-import { BookOpen, Plus, Trash2, CheckCircle, AlertCircle } from "lucide-react";
+import { ArrowLeft, BookOpen, Plus, Trash2, CheckCircle, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
 interface JournalLine {
   accountId: string;
@@ -113,6 +114,9 @@ export default function JournalEntryPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
+        <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+        </Link>
         <div className="p-3 bg-amber-500/10 rounded-lg">
           <BookOpen className="w-6 h-6 text-amber-600" />
         </div>

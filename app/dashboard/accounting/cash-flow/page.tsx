@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_CASH_FLOW_STATEMENT } from "@/lib/graphql/queries";
 import { formatCurrency } from "@/lib/utils";
-import { TrendingUp, Calendar, Printer, Download } from "lucide-react";
+import { ArrowLeft, TrendingUp, Calendar, Printer, Download } from "lucide-react";
+import Link from "next/link";
 
 export default function CashFlowPage() {
   const [startDate, setStartDate] = useState(() => {
@@ -55,6 +56,9 @@ export default function CashFlowPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
           <div className="p-3 bg-cyan-500/10 rounded-lg">
             <TrendingUp className="w-6 h-6 text-cyan-600" />
           </div>

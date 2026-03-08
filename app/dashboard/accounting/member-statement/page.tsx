@@ -8,7 +8,8 @@ import {
   GET_MEMBER_STATEMENT,
 } from "@/lib/graphql/queries";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { FileText, Search, Calendar, Printer, Download, User } from "lucide-react";
+import { ArrowLeft, FileText, Search, Calendar, Printer, Download, User } from "lucide-react";
+import Link from "next/link";
 
 export default function MemberStatementPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,6 +55,9 @@ export default function MemberStatementPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
           <div className="p-3 bg-teal-500/10 rounded-lg">
             <FileText className="w-6 h-6 text-teal-600" />
           </div>

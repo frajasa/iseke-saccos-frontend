@@ -32,10 +32,7 @@ function makeClient() {
             const session = await getSession();
             token = (session as any)?.accessToken || null;
 
-            // Fallback: localStorage (for backward compatibility)
-            if (!token) {
-              token = localStorage.getItem("token");
-            }
+            // Note: localStorage fallback removed for security - rely solely on NextAuth session
           }
 
           operation.setContext(

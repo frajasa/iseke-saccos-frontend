@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_DELINQUENCY_REPORT, GET_BRANCHES } from "@/lib/graphql/queries";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Calculator, Calendar, Building2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Calculator, Calendar, Building2, AlertTriangle } from "lucide-react";
+import Link from "next/link";
 
 export default function DelinquencyReportPage() {
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -31,6 +32,9 @@ export default function DelinquencyReportPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
+        <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+        </Link>
         <div className="p-3 bg-red-500/10 rounded-lg">
           <Calculator className="w-6 h-6 text-red-600" />
         </div>

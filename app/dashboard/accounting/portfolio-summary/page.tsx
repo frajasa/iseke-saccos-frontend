@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_PORTFOLIO_SUMMARY, GET_BRANCHES } from "@/lib/graphql/queries";
 import { formatCurrency } from "@/lib/utils";
-import { PieChart, Calendar, Building2, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import { ArrowLeft, PieChart, Calendar, Building2, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import Link from "next/link";
 
 export default function PortfolioSummaryPage() {
   const [startDate, setStartDate] = useState(() => {
@@ -30,6 +31,9 @@ export default function PortfolioSummaryPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
+        <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+        </Link>
         <div className="p-3 bg-pink-500/10 rounded-lg">
           <PieChart className="w-6 h-6 text-pink-600" />
         </div>

@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_AUDIT_LOGS } from "@/lib/graphql/queries";
-import { Shield, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Shield, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 import { formatDateTime } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
@@ -42,6 +43,9 @@ export default function AuditLogsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
+        <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+        </Link>
         <div className="p-3 bg-indigo-500/10 rounded-lg">
           <Shield className="w-6 h-6 text-indigo-600" />
         </div>

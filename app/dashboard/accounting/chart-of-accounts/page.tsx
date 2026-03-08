@@ -4,7 +4,8 @@ import { useQuery } from "@apollo/client";
 import { GET_CHART_OF_ACCOUNTS } from "@/lib/graphql/queries";
 import { ChartOfAccount } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
-import { BookOpen, ChevronRight, Plus } from "lucide-react";
+import { ArrowLeft, BookOpen, ChevronRight, Plus } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function ChartOfAccountsPage() {
@@ -164,6 +165,9 @@ export default function ChartOfAccountsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
           <div className="p-3 bg-primary/10 rounded-lg">
             <BookOpen className="w-6 h-6 text-primary" />
           </div>
