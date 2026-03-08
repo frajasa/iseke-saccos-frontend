@@ -509,6 +509,9 @@ export const GET_LOAN_ACCOUNTS = gql`
         }
         principalAmount
         outstandingPrincipal
+        outstandingInterest
+        outstandingFees
+        outstandingPenalties
         status
         applicationDate
         disbursementDate

@@ -170,7 +170,12 @@ export default function LoanAccountsPage() {
                         {formatCurrency(loan.principalAmount)}
                       </td>
                       <td className="py-4 px-6 text-sm text-foreground text-right font-medium">
-                        {formatCurrency(loan.outstandingPrincipal)}
+                        {formatCurrency(
+                          Number(loan.outstandingPrincipal || 0) +
+                          Number(loan.outstandingInterest || 0) +
+                          Number(loan.outstandingFees || 0) +
+                          Number(loan.outstandingPenalties || 0)
+                        )}
                       </td>
                       <td className="py-4 px-6 text-center">
                         <span
