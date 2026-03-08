@@ -297,7 +297,7 @@ export default function DepositPage() {
               <div className="border-t border-border pt-2 flex justify-between">
                 <span className="font-semibold">New Balance:</span>
                 <span className="text-xl font-bold text-green-600">
-                  {formatCurrency(account.balance + parseFloat(formData.amount))}
+                  {formatCurrency(Number(account.balance || 0) + parseFloat(formData.amount))}
                 </span>
               </div>
             </div>
