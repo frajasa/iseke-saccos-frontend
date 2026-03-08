@@ -27,10 +27,16 @@ export default function LoanAccountDetailPage() {
     variables: { loanId: id },
   });
 
-  const [approveLoan, { loading: approving }] = useMutation(APPROVE_LOAN);
-  const [disburseLoan, { loading: disbursing }] = useMutation(DISBURSE_LOAN);
-  const [addGuarantor, { loading: addingGuarantor }] = useMutation(ADD_GUARANTOR);
-  const [addCollateral, { loading: addingCollateral }] = useMutation(ADD_COLLATERAL);
+  const refetchAll = [
+    { query: GET_LOAN_ACCOUNT, variables: { id } },
+    { query: GET_LOAN_REPAYMENT_SCHEDULE, variables: { loanId: id, page: schedulePage, size: scheduleSize } },
+    { query: GET_LOAN_TRANSACTIONS, variables: { loanId: id } },
+  ];
+
+  const [approveLoan, { loading: approving }] = useMutation(APPROVE_LOAN, { refetchQueries: refetchAll });
+  const [disburseLoan, { loading: disbursing }] = useMutation(DISBURSE_LOAN, { refetchQueries: refetchAll });
+  const [addGuarantor, { loading: addingGuarantor }] = useMutation(ADD_GUARANTOR, { refetchQueries: refetchAll });
+  const [addCollateral, { loading: addingCollateral }] = useMutation(ADD_COLLATERAL, { refetchQueries: refetchAll });
 
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showDisburseModal, setShowDisburseModal] = useState(false);
@@ -251,7 +257,7 @@ export default function LoanAccountDetailPage() {
           <p className="text-2xl font-bold tabular-nums">{formatCurrency(loan.totalPaid || 0)}</p>
           <p className="text-xs opacity-80 mt-1">
             {Number(loan.principalAmount || 0) > 0
-              ? Math.round((Number(loan.totalPaid || 0) / Number(loan.principalAmount || 1)) * 100)
+              ? Math.min(100, Math.round(((Number(loan.principalAmount || 0) - Number(loan.outstandingPrincipal || 0)) / Number(loan.principalAmount || 1)) * 100))
               : 0}% of principal
           </p>
         </div>
