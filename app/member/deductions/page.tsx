@@ -24,7 +24,7 @@ export default function MemberDeductionsPage() {
 
   const totalMonthly = deductions
     .filter((d: any) => d.isActive)
-    .reduce((sum: number, d: any) => sum + (d.amount || 0), 0);
+    .reduce((sum: number, d: any) => sum + (Number(d.amount) || 0), 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
