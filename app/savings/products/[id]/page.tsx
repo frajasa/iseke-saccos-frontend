@@ -199,7 +199,7 @@ export default function SavingsProductDetailPage() {
                   Tax Withholding Rate
                 </p>
                 <p className="text-foreground font-medium">
-                  {product.taxWithholdingRate}%
+                  {(Number(product.taxWithholdingRate) * 100).toFixed(2)}%
                 </p>
               </div>
             )}
