@@ -207,7 +207,7 @@ export default function LoanProductDetailPage() {
               {product.processingFeeRate && (
                 <div>
                   <p className="text-sm text-muted-foreground">Processing Fee (Rate)</p>
-                  <p className="text-foreground font-medium">{product.processingFeeRate}%</p>
+                  <p className="text-foreground font-medium">{(Number(product.processingFeeRate) * 100).toFixed(2)}%</p>
                 </div>
               )}
               {product.processingFeeFixed && (
@@ -221,13 +221,13 @@ export default function LoanProductDetailPage() {
               {product.insuranceFeeRate && (
                 <div>
                   <p className="text-sm text-muted-foreground">Insurance Fee</p>
-                  <p className="text-foreground font-medium">{product.insuranceFeeRate}%</p>
+                  <p className="text-foreground font-medium">{(Number(product.insuranceFeeRate) * 100).toFixed(2)}%</p>
                 </div>
               )}
               {product.latePaymentPenaltyRate && (
                 <div>
                   <p className="text-sm text-muted-foreground">Late Payment Penalty</p>
-                  <p className="text-foreground font-medium">{product.latePaymentPenaltyRate}%</p>
+                  <p className="text-foreground font-medium">{(Number(product.latePaymentPenaltyRate) * 100).toFixed(2)}%</p>
                 </div>
               )}
             </div>
