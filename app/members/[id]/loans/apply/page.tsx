@@ -46,10 +46,11 @@ export default function ApplyForLoanPage() {
 
     const principal = parseFloat(formData.requestedAmount);
     const months = parseInt(formData.termMonths);
-    const monthlyRate = selectedProduct.interestRate / 100 / 12;
+    const annualRate = Number(selectedProduct.interestRate || 0);
+    const monthlyRate = annualRate / 12;
 
     if (selectedProduct.interestMethod === "FLAT") {
-      const totalInterest = principal * (selectedProduct.interestRate / 100) * (months / 12);
+      const totalInterest = principal * annualRate * (months / 12);
       return (principal + totalInterest) / months;
     } else {
       // Reducing balance
@@ -69,10 +70,10 @@ export default function ApplyForLoanPage() {
     }
     if (selectedProduct) {
       const amount = parseFloat(formData.requestedAmount);
-      if (amount < selectedProduct.minimumAmount) {
+      if (amount < Number(selectedProduct.minimumAmount)) {
         newErrors.requestedAmount = `Minimum loan amount is ${formatCurrency(selectedProduct.minimumAmount)}`;
       }
-      if (amount > selectedProduct.maximumAmount) {
+      if (amount > Number(selectedProduct.maximumAmount)) {
         newErrors.requestedAmount = `Maximum loan amount is ${formatCurrency(selectedProduct.maximumAmount)}`;
       }
     }
@@ -81,10 +82,10 @@ export default function ApplyForLoanPage() {
     }
     if (selectedProduct) {
       const months = parseInt(formData.termMonths);
-      if (months < selectedProduct.minimumTermMonths) {
+      if (months < Number(selectedProduct.minimumTermMonths)) {
         newErrors.termMonths = `Minimum term is ${selectedProduct.minimumTermMonths} months`;
       }
-      if (months > selectedProduct.maximumTermMonths) {
+      if (months > Number(selectedProduct.maximumTermMonths)) {
         newErrors.termMonths = `Maximum term is ${selectedProduct.maximumTermMonths} months`;
       }
     }
@@ -143,7 +144,7 @@ export default function ApplyForLoanPage() {
 
   const monthlyPayment = calculateMonthlyPayment();
   const processingFee = selectedProduct && formData.requestedAmount
-    ? (selectedProduct.processingFeeRate ? parseFloat(formData.requestedAmount) * (selectedProduct.processingFeeRate / 100) : selectedProduct.processingFeeFixed || 0)
+    ? (selectedProduct.processingFeeRate ? parseFloat(formData.requestedAmount) * Number(selectedProduct.processingFeeRate) : Number(selectedProduct.processingFeeFixed || 0))
     : 0;
 
   return (
