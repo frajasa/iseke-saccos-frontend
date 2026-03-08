@@ -289,7 +289,7 @@ export default function LoanRepaymentPage() {
             </button>
             <button
               type="button"
-              onClick={() => setQuickAmount(loan.outstandingPrincipal)}
+              onClick={() => setQuickAmount(Number(loan.outstandingPrincipal || 0))}
               className="p-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
             >
               <p className="text-xs opacity-80">Principal Only</p>
