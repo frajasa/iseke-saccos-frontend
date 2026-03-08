@@ -123,12 +123,12 @@ export default function LoanProductsPage() {
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   {product.processingFeeRate && (
                     <span className="px-2 py-1 rounded bg-muted">
-                      Fee: {product.processingFeeRate}%
+                      Fee: {(Number(product.processingFeeRate) * 100).toFixed(2)}%
                     </span>
                   )}
                   {product.insuranceFeeRate && (
                     <span className="px-2 py-1 rounded bg-muted">
-                      Insurance: {product.insuranceFeeRate}%
+                      Insurance: {(Number(product.insuranceFeeRate) * 100).toFixed(2)}%
                     </span>
                   )}
                 </div>
