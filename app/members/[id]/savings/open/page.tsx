@@ -38,7 +38,7 @@ export default function OpenSavingsAccountPage() {
   });
 
   const member = memberData?.member;
-  const products = productsData?.savingsProducts || [];
+  const products = productsData?.activeSavingsProducts || [];
   const selectedProduct = products.find((p: any) => p.id === formData.productId);
 
   const validateForm = (): boolean => {
@@ -50,7 +50,7 @@ export default function OpenSavingsAccountPage() {
     if (!formData.openingDeposit || parseFloat(formData.openingDeposit) <= 0) {
       newErrors.openingDeposit = "Opening deposit must be greater than 0";
     }
-    if (selectedProduct && parseFloat(formData.openingDeposit) < selectedProduct.minimumOpeningBalance) {
+    if (selectedProduct && parseFloat(formData.openingDeposit) < Number(selectedProduct.minimumOpeningBalance)) {
       newErrors.openingDeposit = `Minimum opening balance is ${formatCurrency(selectedProduct.minimumOpeningBalance)}`;
     }
 
