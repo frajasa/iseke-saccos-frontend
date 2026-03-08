@@ -225,7 +225,7 @@ export default function GeneralLedgerPage() {
                           {entry.reference || "-"}
                         </td>
                         <td className="px-4 py-3 text-sm text-right font-mono">
-                          {entry.debitAmount > 0 ? (
+                          {Number(entry.debitAmount) > 0 ? (
                             <span className="text-blue-600">
                               {formatCurrency(entry.debitAmount)}
                             </span>
@@ -234,7 +234,7 @@ export default function GeneralLedgerPage() {
                           )}
                         </td>
                         <td className="px-4 py-3 text-sm text-right font-mono">
-                          {entry.creditAmount > 0 ? (
+                          {Number(entry.creditAmount) > 0 ? (
                             <span className="text-red-600">
                               {formatCurrency(entry.creditAmount)}
                             </span>

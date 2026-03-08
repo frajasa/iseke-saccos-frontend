@@ -107,8 +107,8 @@ export default function DelinquencyReportPage() {
                 {formatCurrency(report.totalAtRisk)}
               </div>
               <div className="text-sm text-muted-foreground mt-1">
-                {report.totalOutstanding > 0
-                  ? ((report.totalAtRisk / report.totalOutstanding) * 100).toFixed(1)
+                {Number(report.totalOutstanding) > 0
+                  ? ((Number(report.totalAtRisk) / Number(report.totalOutstanding)) * 100).toFixed(1)
                   : 0}
                 % of portfolio
               </div>
@@ -202,25 +202,25 @@ export default function DelinquencyReportPage() {
           {/* Risk Assessment */}
           <div
             className={`p-6 rounded-lg border-2 ${
-              (report.totalAtRisk / report.totalOutstanding) * 100 < 5
+              (Number(report.totalAtRisk) / Number(report.totalOutstanding)) * 100 < 5
                 ? "bg-success/5 border-success"
-                : (report.totalAtRisk / report.totalOutstanding) * 100 < 10
+                : (Number(report.totalAtRisk) / Number(report.totalOutstanding)) * 100 < 10
                 ? "bg-amber-500/5 border-amber-500"
                 : "bg-destructive/5 border-destructive"
             }`}
           >
             <h3 className="text-lg font-semibold text-foreground mb-2">Risk Assessment</h3>
             <p className="text-sm text-muted-foreground">
-              {(report.totalAtRisk / report.totalOutstanding) * 100 < 5
+              {(Number(report.totalAtRisk) / Number(report.totalOutstanding)) * 100 < 5
                 ? "Low Risk: Portfolio at risk is less than 5%. Portfolio is performing well."
-                : (report.totalAtRisk / report.totalOutstanding) * 100 < 10
+                : (Number(report.totalAtRisk) / Number(report.totalOutstanding)) * 100 < 10
                 ? "Moderate Risk: Portfolio at risk is between 5-10%. Monitor closely."
                 : "High Risk: Portfolio at risk exceeds 10%. Immediate action recommended."}
             </p>
           </div>
 
           {/* Recommendations */}
-          {(report.totalAtRisk / report.totalOutstanding) * 100 >= 10 && (
+          {(Number(report.totalAtRisk) / Number(report.totalOutstanding)) * 100 >= 10 && (
             <div className="bg-destructive/5 border border-destructive rounded-lg p-6">
               <h3 className="text-lg font-semibold text-destructive mb-3 flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5" />

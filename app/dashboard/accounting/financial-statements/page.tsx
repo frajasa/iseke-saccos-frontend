@@ -186,10 +186,10 @@ export default function FinancialStatementsPage() {
                     <div className="flex justify-between items-center text-lg font-bold">
                       <span className="text-foreground">Total Liabilities and Equity</span>
                       <span className="font-mono text-foreground">
-                        {formatCurrency(balanceSheet.liabilities + balanceSheet.equity)}
+                        {formatCurrency(Number(balanceSheet.liabilities || 0) + Number(balanceSheet.equity || 0))}
                       </span>
                     </div>
-                    {Math.abs(balanceSheet.assets - (balanceSheet.liabilities + balanceSheet.equity)) > 0.01 && (
+                    {Math.abs(Number(balanceSheet.assets || 0) - (Number(balanceSheet.liabilities || 0) + Number(balanceSheet.equity || 0))) > 0.01 && (
                       <div className="mt-2 text-destructive text-sm">
                         Warning: Assets do not equal Liabilities + Equity
                       </div>
@@ -221,7 +221,7 @@ export default function FinancialStatementsPage() {
                   <div className="text-sm text-muted-foreground mb-1">Net Income</div>
                   <div
                     className={`text-3xl font-bold ${
-                      incomeStatement.netIncome >= 0 ? "text-success" : "text-destructive"
+                      Number(incomeStatement.netIncome || 0) >= 0 ? "text-success" : "text-destructive"
                     }`}
                   >
                     {formatCurrency(incomeStatement.netIncome)}
@@ -270,7 +270,7 @@ export default function FinancialStatementsPage() {
                       <span className="text-foreground">Net Income (Loss)</span>
                       <span
                         className={`font-mono ${
-                          incomeStatement.netIncome >= 0 ? "text-success" : "text-destructive"
+                          Number(incomeStatement.netIncome || 0) >= 0 ? "text-success" : "text-destructive"
                         }`}
                       >
                         {formatCurrency(incomeStatement.netIncome)}

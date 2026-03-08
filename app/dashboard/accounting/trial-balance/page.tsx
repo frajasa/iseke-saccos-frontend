@@ -14,7 +14,7 @@ export default function TrialBalancePage() {
   });
 
   const isBalanced =
-    data?.trialBalance?.totalDebits === data?.trialBalance?.totalCredits;
+    Number(data?.trialBalance?.totalDebits || 0) === Number(data?.trialBalance?.totalCredits || 0);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedDate(e.target.value);
@@ -96,7 +96,7 @@ export default function TrialBalancePage() {
                 {isBalanced
                   ? "Total debits equal total credits. The books are balanced."
                   : `Difference: ${formatCurrency(
-                      Math.abs(data.trialBalance.totalDebits - data.trialBalance.totalCredits)
+                      Math.abs(Number(data.trialBalance.totalDebits || 0) - Number(data.trialBalance.totalCredits || 0))
                     )}`}
               </p>
             </div>
@@ -127,7 +127,7 @@ export default function TrialBalancePage() {
               }`}
             >
               {formatCurrency(
-                Math.abs(data.trialBalance.totalDebits - data.trialBalance.totalCredits)
+                Math.abs(Number(data.trialBalance.totalDebits || 0) - Number(data.trialBalance.totalCredits || 0))
               )}
             </div>
           </div>
@@ -199,7 +199,7 @@ export default function TrialBalancePage() {
                       {entry.account.accountCategory?.replace(/_/g, " ")}
                     </td>
                     <td className="px-4 py-3 text-sm text-right font-mono">
-                      {entry.debitBalance > 0 ? (
+                      {Number(entry.debitBalance) > 0 ? (
                         <span className="text-blue-600 font-semibold">
                           {formatCurrency(entry.debitBalance)}
                         </span>
@@ -208,7 +208,7 @@ export default function TrialBalancePage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm text-right font-mono">
-                      {entry.creditBalance > 0 ? (
+                      {Number(entry.creditBalance) > 0 ? (
                         <span className="text-red-600 font-semibold">
                           {formatCurrency(entry.creditBalance)}
                         </span>
@@ -242,7 +242,7 @@ export default function TrialBalancePage() {
                     >
                       {formatCurrency(
                         Math.abs(
-                          data.trialBalance.totalDebits - data.trialBalance.totalCredits
+                          Number(data.trialBalance.totalDebits || 0) - Number(data.trialBalance.totalCredits || 0)
                         )
                       )}
                     </td>

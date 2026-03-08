@@ -94,8 +94,8 @@ export default function LoanProvisioningPage() {
                 {formatCurrency(report.totalProvision)}
               </div>
               <div className="text-xs text-red-600 mt-1">
-                {report.totalOutstanding > 0
-                  ? ((report.totalProvision / report.totalOutstanding) * 100).toFixed(2)
+                {Number(report.totalOutstanding) > 0
+                  ? ((Number(report.totalProvision) / Number(report.totalOutstanding)) * 100).toFixed(2)
                   : "0.00"}% of portfolio
               </div>
             </div>
@@ -133,7 +133,7 @@ export default function LoanProvisioningPage() {
                         {formatCurrency(cls.outstandingAmount)}
                       </td>
                       <td className="px-4 py-3 text-sm text-right font-mono text-foreground">
-                        {(cls.provisionRate * 100).toFixed(0)}%
+                        {(Number(cls.provisionRate) * 100).toFixed(0)}%
                       </td>
                       <td className="px-4 py-3 text-sm text-right font-mono font-semibold text-red-600">
                         {formatCurrency(cls.provisionAmount)}

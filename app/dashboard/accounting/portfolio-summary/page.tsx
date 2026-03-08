@@ -156,8 +156,8 @@ export default function PortfolioSummaryPage() {
                 {portfolio.delinquentLoans}
               </div>
               <div className="text-sm text-muted-foreground mt-1">
-                {portfolio.totalLoans > 0
-                  ? ((portfolio.delinquentLoans / portfolio.totalLoans) * 100).toFixed(1)
+                {Number(portfolio.totalLoans) > 0
+                  ? ((Number(portfolio.delinquentLoans) / Number(portfolio.totalLoans)) * 100).toFixed(1)
                   : 0}
                 % of total
               </div>
@@ -169,8 +169,8 @@ export default function PortfolioSummaryPage() {
                 {formatCurrency(portfolio.portfolioAtRisk)}
               </div>
               <div className="text-sm text-muted-foreground mt-1">
-                {portfolio.totalOutstanding > 0
-                  ? ((portfolio.portfolioAtRisk / portfolio.totalOutstanding) * 100).toFixed(1)
+                {Number(portfolio.totalOutstanding) > 0
+                  ? ((Number(portfolio.portfolioAtRisk) / Number(portfolio.totalOutstanding)) * 100).toFixed(1)
                   : 0}
                 % of outstanding
               </div>
@@ -185,8 +185,8 @@ export default function PortfolioSummaryPage() {
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-muted-foreground">Collection Rate</span>
                   <span className="font-semibold text-foreground">
-                    {portfolio.totalDisbursed > 0
-                      ? ((portfolio.totalPaid / portfolio.totalDisbursed) * 100).toFixed(1)
+                    {Number(portfolio.totalDisbursed) > 0
+                      ? ((Number(portfolio.totalPaid) / Number(portfolio.totalDisbursed)) * 100).toFixed(1)
                       : 0}
                     %
                   </span>
@@ -196,9 +196,9 @@ export default function PortfolioSummaryPage() {
                     className="bg-success h-4 rounded-full transition-all"
                     style={{
                       width: `${
-                        portfolio.totalDisbursed > 0
+                        Number(portfolio.totalDisbursed) > 0
                           ? Math.min(
-                              (portfolio.totalPaid / portfolio.totalDisbursed) * 100,
+                              (Number(portfolio.totalPaid) / Number(portfolio.totalDisbursed)) * 100,
                               100
                             )
                           : 0
@@ -213,18 +213,18 @@ export default function PortfolioSummaryPage() {
           {/* Health Indicator */}
           <div
             className={`p-6 rounded-lg border-2 ${
-              portfolio.portfolioAtRisk < portfolio.totalOutstanding * 0.05
+              Number(portfolio.portfolioAtRisk) < Number(portfolio.totalOutstanding) * 0.05
                 ? "bg-success/5 border-success"
-                : portfolio.portfolioAtRisk < portfolio.totalOutstanding * 0.1
+                : Number(portfolio.portfolioAtRisk) < Number(portfolio.totalOutstanding) * 0.1
                 ? "bg-amber-500/5 border-amber-500"
                 : "bg-destructive/5 border-destructive"
             }`}
           >
             <h3 className="text-lg font-semibold text-foreground mb-2">Portfolio Health</h3>
             <p className="text-sm text-muted-foreground">
-              {portfolio.portfolioAtRisk < portfolio.totalOutstanding * 0.05
+              {Number(portfolio.portfolioAtRisk) < Number(portfolio.totalOutstanding) * 0.05
                 ? "Excellent: Portfolio at risk is less than 5% of outstanding loans."
-                : portfolio.portfolioAtRisk < portfolio.totalOutstanding * 0.1
+                : Number(portfolio.portfolioAtRisk) < Number(portfolio.totalOutstanding) * 0.1
                 ? "Good: Portfolio at risk is between 5-10% of outstanding loans."
                 : "Attention Required: Portfolio at risk exceeds 10% of outstanding loans."}
             </p>
