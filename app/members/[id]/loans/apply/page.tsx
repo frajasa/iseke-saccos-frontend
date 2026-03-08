@@ -193,7 +193,7 @@ export default function ApplyForLoanPage() {
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-semibold text-foreground">{product.productName}</h3>
                     <span className="text-sm font-semibold text-primary">
-                      {product.interestRate}% {product.interestMethod}
+                      {(Number(product.interestRate || 0) * 100).toFixed(2)}% {product.interestMethod}
                     </span>
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">{product.description}</p>

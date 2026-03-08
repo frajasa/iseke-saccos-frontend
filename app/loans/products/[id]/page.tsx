@@ -95,7 +95,7 @@ export default function LoanProductDetailPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-card rounded-xl border border-border p-6">
           <p className="text-sm text-muted-foreground mb-1">Interest Rate</p>
-          <p className="text-2xl font-bold text-foreground">{product.interestRate}%</p>
+          <p className="text-2xl font-bold text-foreground">{(Number(product.interestRate || 0) * 100).toFixed(2)}%</p>
           <p className="text-xs text-muted-foreground mt-1">{product.interestMethod}</p>
         </div>
 
@@ -152,7 +152,7 @@ export default function LoanProductDetailPage() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Interest Rate</p>
-                <p className="text-foreground font-medium">{product.interestRate}% p.a.</p>
+                <p className="text-foreground font-medium">{(Number(product.interestRate || 0) * 100).toFixed(2)}% p.a.</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Interest Method</p>

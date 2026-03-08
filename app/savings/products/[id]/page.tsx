@@ -109,7 +109,7 @@ export default function SavingsProductDetailPage() {
         <div className="bg-card rounded-xl border border-border p-6">
           <p className="text-sm text-muted-foreground mb-1">Interest Rate</p>
           <p className="text-2xl font-bold text-foreground">
-            {product.interestRate}%
+            {(Number(product.interestRate || 0) * 100).toFixed(2)}%
           </p>
           <p className="text-xs text-muted-foreground mt-1">per annum</p>
         </div>
@@ -175,7 +175,7 @@ export default function SavingsProductDetailPage() {
               <div>
                 <p className="text-sm text-muted-foreground">Interest Rate</p>
                 <p className="text-foreground font-medium">
-                  {product.interestRate}% p.a.
+                  {(Number(product.interestRate || 0) * 100).toFixed(2)}% p.a.
                 </p>
               </div>
               <div>

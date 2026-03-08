@@ -88,7 +88,7 @@ export default function SavingsProductsPage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Interest Rate</span>
                   <span className="font-semibold text-foreground">
-                    {product.interestRate}% p.a.
+                    {(Number(product.interestRate || 0) * 100).toFixed(2)}% p.a.
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">

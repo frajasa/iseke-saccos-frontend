@@ -87,7 +87,7 @@ export default function LoanProductsPage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Interest Rate</span>
                   <span className="font-semibold text-foreground">
-                    {product.interestRate}% ({product.interestMethod})
+                    {(Number(product.interestRate || 0) * 100).toFixed(2)}% ({product.interestMethod})
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">

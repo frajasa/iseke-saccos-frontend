@@ -229,7 +229,7 @@ export default function LoanAccountDetailPage() {
             <DollarSign className="w-5 h-5 opacity-80" />
           </div>
           <p className="text-2xl font-bold tabular-nums">{formatCurrency(loan.principalAmount || 0)}</p>
-          <p className="text-xs opacity-80 mt-1">{loan.interestRate || 0}% interest</p>
+          <p className="text-xs opacity-80 mt-1">{(Number(loan.interestRate || 0) * 100).toFixed(2)}% interest</p>
         </div>
 
         <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-xl p-6 text-white">
@@ -250,8 +250,8 @@ export default function LoanAccountDetailPage() {
           </div>
           <p className="text-2xl font-bold tabular-nums">{formatCurrency(loan.totalPaid || 0)}</p>
           <p className="text-xs opacity-80 mt-1">
-            {(loan.principalAmount || 0) > 0
-              ? Math.round(((loan.totalPaid || 0) / (loan.principalAmount || 1)) * 100)
+            {Number(loan.principalAmount || 0) > 0
+              ? Math.round((Number(loan.totalPaid || 0) / Number(loan.principalAmount || 1)) * 100)
               : 0}% of principal
           </p>
         </div>

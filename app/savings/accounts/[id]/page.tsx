@@ -105,7 +105,7 @@ export default function SavingsAccountDetailPage() {
             <TrendingUp className="w-5 h-5 opacity-80" />
           </div>
           <p className="text-2xl font-bold tabular-nums">{formatCurrency(account.accruedInterest)}</p>
-          <p className="text-xs opacity-80 mt-1">{account.product?.interestRate}% p.a.</p>
+          <p className="text-xs opacity-80 mt-1">{(Number(account.product?.interestRate || 0) * 100).toFixed(2)}% p.a.</p>
         </div>
 
         <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white">

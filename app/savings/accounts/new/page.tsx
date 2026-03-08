@@ -253,7 +253,7 @@ export default function NewSavingsAccountPage() {
                   <option value="">Select a savings product</option>
                   {products.map((product: any) => (
                     <option key={product.id} value={product.id}>
-                      {product.productName} - {product.interestRate}% p.a. (Min: TZS {product.minimumOpeningBalance.toLocaleString()})
+                      {product.productName} - {(Number(product.interestRate || 0) * 100).toFixed(2)}% p.a. (Min: TZS {Number(product.minimumOpeningBalance || 0).toLocaleString()})
                     </option>
                   ))}
                 </select>
