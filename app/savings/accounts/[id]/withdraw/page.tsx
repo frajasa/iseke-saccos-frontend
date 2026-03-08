@@ -42,10 +42,10 @@ export default function WithdrawPage() {
     if (!formData.amount || parseFloat(formData.amount) <= 0) {
       newErrors.amount = "Amount must be greater than 0";
     }
-    if (account && parseFloat(formData.amount) > account.availableBalance) {
+    if (account && parseFloat(formData.amount) > Number(account.availableBalance || 0)) {
       newErrors.amount = `Insufficient funds. Available: ${formatCurrency(account.availableBalance)}`;
     }
-    if (account?.product?.withdrawalLimit && parseFloat(formData.amount) > account.product.withdrawalLimit) {
+    if (account?.product?.withdrawalLimit && parseFloat(formData.amount) > Number(account.product.withdrawalLimit)) {
       newErrors.amount = `Withdrawal limit is ${formatCurrency(account.product.withdrawalLimit)}`;
     }
 
@@ -107,7 +107,7 @@ export default function WithdrawPage() {
     return <ErrorDisplay variant="full-page" title="Account Not Found" message="The savings account you're looking for doesn't exist." />;
   }
 
-  const withdrawalFee = account?.product?.withdrawalFee || 0;
+  const withdrawalFee = Number(account?.product?.withdrawalFee || 0);
   const totalDeduction = formData.amount ? parseFloat(formData.amount) + withdrawalFee : 0;
 
   return (
@@ -141,7 +141,7 @@ export default function WithdrawPage() {
       </div>
 
       {/* Warning */}
-      {account.product?.minimumBalance && account.balance < account.product.minimumBalance && (
+      {account.product?.minimumBalance && Number(account.balance || 0) < Number(account.product.minimumBalance) && (
         <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
           <div>
@@ -248,7 +248,7 @@ export default function WithdrawPage() {
               <div className="border-t border-border pt-2 flex justify-between">
                 <span className="font-semibold">New Balance:</span>
                 <span className="text-xl font-bold text-orange-600">
-                  {formatCurrency(account.balance - totalDeduction)}
+                  {formatCurrency(Number(account.balance || 0) - totalDeduction)}
                 </span>
               </div>
             </div>
