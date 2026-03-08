@@ -94,13 +94,13 @@ export default function SavingsProductsPage() {
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Min Balance</span>
                   <span className="font-semibold text-foreground">
-                    TZS {(product.minimumBalance ?? 0).toLocaleString()}
+                    TZS {Number(product.minimumBalance || 0).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Opening Balance</span>
                   <span className="font-semibold text-foreground">
-                    TZS {(product.minimumOpeningBalance ?? 0).toLocaleString()}
+                    TZS {Number(product.minimumOpeningBalance || 0).toLocaleString()}
                   </span>
                 </div>
               </div>
