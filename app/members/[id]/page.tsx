@@ -425,7 +425,12 @@ export default function MemberDetailPage() {
                     Principal: {formatCurrency(loan.principalAmount)}
                   </p>
                   <p className="text-sm text-foreground mb-2">
-                    Outstanding: {formatCurrency(loan.outstandingPrincipal)}
+                    Outstanding: {formatCurrency(
+                      Number(loan.outstandingPrincipal || 0) +
+                      Number(loan.outstandingInterest || 0) +
+                      Number(loan.outstandingFees || 0) +
+                      Number(loan.outstandingPenalties || 0)
+                    )}
                   </p>
                   {loan.daysInArrears > 0 && (
                     <p className="text-sm text-destructive mb-2">
