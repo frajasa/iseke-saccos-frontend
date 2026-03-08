@@ -58,8 +58,8 @@ export default function NewSavingsAccountPage() {
     if (!formData.openingDeposit || formData.openingDeposit <= 0) {
       newErrors.openingDeposit = "Opening deposit must be greater than 0";
     }
-    if (selectedProduct && formData.openingDeposit < selectedProduct.minimumOpeningBalance) {
-      newErrors.openingDeposit = `Minimum opening deposit is TZS ${selectedProduct.minimumOpeningBalance.toLocaleString()}`;
+    if (selectedProduct && formData.openingDeposit < Number(selectedProduct.minimumOpeningBalance)) {
+      newErrors.openingDeposit = `Minimum opening deposit is TZS ${Number(selectedProduct.minimumOpeningBalance).toLocaleString()}`;
     }
 
     setErrors(newErrors);
@@ -282,7 +282,7 @@ export default function NewSavingsAccountPage() {
                 )}
                 {selectedProduct && (
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Minimum: TZS {selectedProduct.minimumOpeningBalance.toLocaleString()}
+                    Minimum: TZS {Number(selectedProduct.minimumOpeningBalance).toLocaleString()}
                   </p>
                 )}
               </div>
