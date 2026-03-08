@@ -58,8 +58,8 @@ export default function EditLoanProductPage() {
     if (formData.interestRate !== undefined && formData.interestRate < 0) {
       newErrors.interestRate = "Interest rate must be 0 or greater";
     }
-    if (formData.minimumAmount !== undefined && formData.minimumAmount < 0) {
-      newErrors.minimumAmount = "Minimum amount must be 0 or greater";
+    if (formData.minimumAmount !== undefined && formData.minimumAmount <= 0) {
+      newErrors.minimumAmount = "Minimum amount must be greater than 0";
     }
     if (formData.maximumAmount !== undefined && formData.maximumAmount <= 0) {
       newErrors.maximumAmount = "Maximum amount must be greater than 0";

@@ -54,8 +54,8 @@ export default function NewLoanProductPage() {
     if (formData.interestRate < 0) {
       newErrors.interestRate = "Interest rate must be 0 or greater";
     }
-    if (formData.minimumAmount < 0) {
-      newErrors.minimumAmount = "Minimum amount must be 0 or greater";
+    if (formData.minimumAmount <= 0) {
+      newErrors.minimumAmount = "Minimum amount must be greater than 0";
     }
     if (formData.maximumAmount <= 0) {
       newErrors.maximumAmount = "Maximum amount must be greater than 0";

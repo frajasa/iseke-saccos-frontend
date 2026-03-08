@@ -591,21 +591,20 @@ function UserFormModal({ mode, user, onClose, onSubmit }: UserFormModalProps) {
                 value={formData.linkedMemberId}
                 onChange={(e) => {
                   const memberId = e.target.value;
-                  setFormData({ ...formData, linkedMemberId: memberId });
-                  if (memberId && mode === "create") {
-                    const member = members.find((m: any) => m.id === memberId);
-                    if (member) {
-                      setFormData((prev) => ({
-                        ...prev,
-                        linkedMemberId: memberId,
-                        firstName: member.firstName || prev.firstName,
-                        middleName: member.middleName || prev.middleName,
-                        lastName: member.lastName || prev.lastName,
-                        email: member.email || prev.email,
-                        phoneNumber: member.phoneNumber || prev.phoneNumber,
-                      }));
-                    }
-                  }
+                  const member = memberId && mode === "create"
+                    ? members.find((m: any) => m.id === memberId)
+                    : null;
+                  setFormData((prev) => ({
+                    ...prev,
+                    linkedMemberId: memberId,
+                    ...(member ? {
+                      firstName: member.firstName || prev.firstName,
+                      middleName: member.middleName || prev.middleName,
+                      lastName: member.lastName || prev.lastName,
+                      email: member.email || prev.email,
+                      phoneNumber: member.phoneNumber || prev.phoneNumber,
+                    } : {}),
+                  }));
                 }}
                 className={inputClass}
               >

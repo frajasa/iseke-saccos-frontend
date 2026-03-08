@@ -174,7 +174,7 @@ export default function MemberDetailPage() {
           <div>
             <p className="text-sm text-muted-foreground mb-1">Branch</p>
             <p className="text-foreground font-medium">
-              {member.branch?.branchName} ({member.branch?.branchCode})
+              {member.branch ? `${member.branch.branchName} (${member.branch.branchCode})` : "Not assigned"}
             </p>
           </div>
         </div>

@@ -747,16 +747,15 @@ export interface JournalEntryLine {
 
 export interface GeneralLedger {
   id: string;
+  postingDate: string;
   account: ChartOfAccount;
-  entryDate: string;
-  transactionDate: string;
-  description: string;
-  referenceNumber?: string;
   debitAmount: number;
   creditAmount: number;
   balance: number;
-  journalEntry: JournalEntry;
-  branch: Branch;
+  description: string;
+  reference?: string;
+  branch?: Branch;
+  postedBy?: string;
   createdAt: string;
 }
 

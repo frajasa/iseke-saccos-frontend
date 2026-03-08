@@ -40,8 +40,11 @@ export function formatDateTime(date: string | Date): string {
 }
 
 export function getInitials(name: string): string {
+  if (!name || !name.trim()) return "??";
   return name
+    .trim()
     .split(" ")
+    .filter((n) => n.length > 0)
     .map((n) => n[0])
     .join("")
     .toUpperCase()
@@ -55,8 +58,12 @@ export function truncate(str: string, length: number): string {
 export function formatPhoneNumber(phone: string): string {
   // Format Tanzanian phone numbers
   const cleaned = phone.replace(/\D/g, "");
-  if (cleaned.startsWith("255")) {
-    return `+${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6, 9)} ${cleaned.slice(9)}`;
+  let normalized = cleaned;
+  if (cleaned.startsWith("0") && cleaned.length >= 10) {
+    normalized = "255" + cleaned.slice(1);
+  }
+  if (normalized.startsWith("255") && normalized.length >= 12) {
+    return `+${normalized.slice(0, 3)} ${normalized.slice(3, 6)} ${normalized.slice(6, 9)} ${normalized.slice(9)}`;
   }
   return phone;
 }
