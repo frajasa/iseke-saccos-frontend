@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node:*)",
+      "Bash(rm:*)",
+      "Bash(npm install:*)",
+      "Bash(timeout 10 npx next:*)",
+      "Bash(npm audit:*)",
+      "Bash(timeout 15 npm run:*)",
+      "Bash(test:*)",
+      "Bash(openssl rand:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(curl:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(xargs grep:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git:*)",
+      "Bash(npx next:*)",
+      "Bash(npm ls:*)",
+      "Bash(find app:*)",
+      "Bash(grep:*)"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Navy blue circle background -->
+  <circle cx="50" cy="50" r="48" fill="#003B73"/>
+  
+  <!-- Green accent circle -->
+  <circle cx="50" cy="50" r="42" fill="none" stroke="#008751" stroke-width="2"/>
+  
+  <!-- Letter "IS" for ISEKE SACCOS -->
+  <text x="50" y="62" font-family="Arial, sans-serif" font-size="38" font-weight="bold" fill="white" text-anchor="middle">IS</text>
+  
+  <!-- Small green dot accent -->
+  <circle cx="72" cy="72" r="6" fill="#008751"/>
+</svg>
