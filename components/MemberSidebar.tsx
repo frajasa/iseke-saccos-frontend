@@ -14,15 +14,37 @@ import {
   LogOut,
   Menu,
   X,
+  PiggyBank,
+  User,
+  Calculator,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const navigation = [
-  { name: "Dashboard", href: "/member", icon: LayoutDashboard },
-  { name: "My Deductions", href: "/member/deductions", icon: Receipt },
-  { name: "My Requests", href: "/member/requests", icon: FileText },
-  { name: "Apply for Loan", href: "/member/apply-loan", icon: CreditCard },
-  { name: "Request Withdrawal", href: "/member/withdraw", icon: Wallet },
+  {
+    label: "OVERVIEW",
+    items: [
+      { name: "Dashboard", href: "/member", icon: LayoutDashboard },
+      { name: "My Profile", href: "/member/profile", icon: User },
+    ],
+  },
+  {
+    label: "ACCOUNTS",
+    items: [
+      { name: "Savings Accounts", href: "/member/accounts", icon: PiggyBank },
+      { name: "Loan Accounts", href: "/member/loans", icon: CreditCard },
+      { name: "My Deductions", href: "/member/deductions", icon: Receipt },
+    ],
+  },
+  {
+    label: "SERVICES",
+    items: [
+      { name: "Apply for Loan", href: "/member/apply-loan", icon: CreditCard },
+      { name: "Request Withdrawal", href: "/member/withdraw", icon: Wallet },
+      { name: "My Requests", href: "/member/requests", icon: FileText },
+      { name: "Loan Calculator", href: "/member/loan-calculator", icon: Calculator },
+    ],
+  },
 ];
 
 export default function MemberSidebar() {
@@ -56,25 +78,34 @@ export default function MemberSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-        {navigation.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 font-medium group",
-                isActive
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              <item.icon className={cn("w-[18px] h-[18px] shrink-0", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
-              <span className="text-[13px] truncate">{item.name}</span>
-            </Link>
-          );
-        })}
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-5">
+        {navigation.map((group) => (
+          <div key={group.label}>
+            <p className="px-3 mb-2 text-[10px] font-semibold text-muted-foreground tracking-[0.08em] uppercase">
+              {group.label}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 font-medium group",
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    <item.icon className={cn("w-[18px] h-[18px] shrink-0", isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground")} />
+                    <span className="text-[13px] truncate">{item.name}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* User Info & Logout */}

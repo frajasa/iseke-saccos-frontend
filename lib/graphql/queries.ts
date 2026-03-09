@@ -1526,6 +1526,158 @@ export const REVIEW_ESS_REQUEST = gql`
   }
 `;
 
+export const GET_ESS_SAVINGS_ACCOUNTS = gql`
+  query GetEssSavingsAccounts {
+    essSavingsAccounts {
+      id
+      accountNumber
+      balance
+      availableBalance
+      accruedInterest
+      status
+      openingDate
+      lastTransactionDate
+      product {
+        id
+        productName
+        productType
+        interestRate
+      }
+      branch {
+        id
+        branchName
+      }
+    }
+  }
+`;
+
+export const GET_ESS_LOAN_ACCOUNTS = gql`
+  query GetEssLoanAccounts {
+    essLoanAccounts {
+      id
+      loanNumber
+      principalAmount
+      outstandingPrincipal
+      outstandingInterest
+      outstandingFees
+      outstandingPenalties
+      totalPaid
+      interestRate
+      termMonths
+      repaymentFrequency
+      applicationDate
+      approvalDate
+      disbursementDate
+      nextPaymentDate
+      maturityDate
+      status
+      daysInArrears
+      purpose
+      product {
+        id
+        productName
+      }
+      branch {
+        id
+        branchName
+      }
+    }
+  }
+`;
+
+export const GET_ESS_PROFILE = gql`
+  query GetEssProfile {
+    essProfile {
+      id
+      memberNumber
+      firstName
+      middleName
+      lastName
+      dateOfBirth
+      gender
+      nationalId
+      phoneNumber
+      email
+      address
+      membershipDate
+      status
+      shares
+      branch {
+        id
+        branchName
+      }
+      employer {
+        id
+        employerName
+      }
+      employeeNumber
+      department
+    }
+  }
+`;
+
+export const GET_ESS_ACCOUNT_TRANSACTIONS = gql`
+  query GetEssAccountTransactions($accountId: ID!, $limit: Int) {
+    essAccountTransactions(accountId: $accountId, limit: $limit) {
+      id
+      transactionNumber
+      transactionDate
+      transactionType
+      amount
+      balanceBefore
+      balanceAfter
+      description
+      referenceNumber
+      paymentMethod
+      status
+      createdAt
+    }
+  }
+`;
+
+export const GET_ESS_LOAN_REPAYMENT_SCHEDULE = gql`
+  query GetEssLoanRepaymentSchedule($loanId: ID!, $page: Int, $size: Int) {
+    essLoanRepaymentSchedule(loanId: $loanId, page: $page, size: $size) {
+      content {
+        id
+        installmentNumber
+        dueDate
+        principalAmount
+        interestAmount
+        totalAmount
+        totalPaid
+        status
+        paymentDate
+      }
+      totalElements
+      totalPages
+    }
+  }
+`;
+
+export const GET_ESS_LOAN_PRODUCTS = gql`
+  query GetEssLoanProducts {
+    essLoanProducts {
+      id
+      productCode
+      productName
+      description
+      interestRate
+      interestMethod
+      repaymentFrequency
+      minimumAmount
+      maximumAmount
+      minimumTermMonths
+      maximumTermMonths
+      processingFeeRate
+      processingFeeFixed
+      requiresGuarantors
+      minimumGuarantors
+      requiresCollateral
+    }
+  }
+`;
+
 // ==========================================
 // Missing Queries & Mutations
 // ==========================================

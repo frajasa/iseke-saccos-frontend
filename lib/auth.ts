@@ -1,7 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-const GRAPHQL_URL = process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:8080/graphql";
+const GRAPHQL_URL = process.env.GRAPHQL_BACKEND_URL || process.env.NEXT_PUBLIC_GRAPHQL_URL || "http://localhost:8080/graphql";
 
 interface LoginResponse {
   login: {
