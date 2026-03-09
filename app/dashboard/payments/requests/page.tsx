@@ -68,10 +68,12 @@ export default function PaymentRequestsPage() {
           <option value="">All Statuses</option>
           <option value="INITIATED">Initiated</option>
           <option value="SENT">Sent</option>
+          <option value="CALLBACK_RECEIVED">Callback Received</option>
           <option value="COMPLETED">Completed</option>
           <option value="FAILED">Failed</option>
           <option value="EXPIRED">Expired</option>
           <option value="CANCELLED">Cancelled</option>
+          <option value="REVERSED">Reversed</option>
         </select>
       </div>
 
