@@ -2,13 +2,13 @@
 @import "@fontsource-variable/inter";
 
 :root {
-  /* ISACCOS Brand Colors */
-  --brand-navy: #003B73;
-  --brand-navy-light: #0052A3;
-  --brand-navy-dark: #002952;
-  --brand-green: #008751;
-  --brand-green-light: #00A562;
-  --brand-green-dark: #006940;
+  /* ISACCOS Brand Colors — extracted from logo.png */
+  --brand-navy: #003E79;
+  --brand-navy-light: #005599;
+  --brand-navy-dark: #002B55;
+  --brand-green: #008945;
+  --brand-green-light: #00A856;
+  --brand-green-dark: #006B35;
 
   /* Application Colors */
   --background: #F7F8FA;
@@ -17,16 +17,16 @@
   --card-foreground: #111827;
 
   /* Primary: Navy Blue from logo */
-  --primary: #003B73;
+  --primary: #003E79;
   --primary-foreground: #ffffff;
-  --primary-hover: #0052A3;
+  --primary-hover: #005599;
 
   /* Secondary: Light background */
   --secondary: #EEF2F7;
-  --secondary-foreground: #003B73;
+  --secondary-foreground: #003E79;
 
   /* Success: Green from logo */
-  --success: #008751;
+  --success: #008945;
   --success-foreground: #ffffff;
 
   /* Muted: Subtle backgrounds */
@@ -44,7 +44,7 @@
   /* Borders and inputs */
   --border: #E5E7EB;
   --input: #D1D5DB;
-  --ring: #003B73;
+  --ring: #003E79;
 
   /* Border radius */
   --radius: 0.75rem;
@@ -90,9 +90,9 @@
     --foreground: #E8F4F8;
     --card: #161D27;
     --card-foreground: #E8F4F8;
-    --primary: #3B82F6;
+    --primary: #4A90CC;
     --primary-foreground: #ffffff;
-    --primary-hover: #2563EB;
+    --primary-hover: #5DA3E0;
     --secondary: #1E293B;
     --secondary-foreground: #E8F4F8;
     --muted: #1E293B;
@@ -101,11 +101,11 @@
     --accent-foreground: #ffffff;
     --destructive: #EF4444;
     --destructive-foreground: #ffffff;
-    --success: #10B981;
+    --success: #2EAD6A;
     --success-foreground: #ffffff;
     --border: #1E293B;
     --input: #334155;
-    --ring: #3B82F6;
+    --ring: #4A90CC;
   }
 }
 
