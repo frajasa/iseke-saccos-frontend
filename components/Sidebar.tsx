@@ -96,6 +96,14 @@ export default function Sidebar() {
 
   const sidebarWidth = isCollapsed ? "w-[72px]" : "w-64";
 
+  // Sync sidebar width to CSS variable so the layout can respond
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--sidebar-width",
+      isCollapsed ? "72px" : "256px"
+    );
+  }, [isCollapsed]);
+
   const SidebarContent = ({ mobile = false }: { mobile?: boolean }) => (
     <div className="flex flex-col h-full">
       {/* Logo */}
