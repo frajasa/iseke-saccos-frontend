@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useMutation } from "@apollo/client/react";
-import { ESS_APPLY_FOR_LOAN } from "@/lib/graphql/queries";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useLazyQuery } from "@apollo/client/react";
+import { ESS_APPLY_FOR_LOAN, GET_ESS_LOAN_PRODUCTS, CHECK_ESS_LOAN_ELIGIBILITY } from "@/lib/graphql/queries";
 import { formatCurrency } from "@/lib/utils";
-import { CreditCard, CheckCircle, Loader2 } from "lucide-react";
+import { CreditCard, CheckCircle, Loader2, AlertTriangle, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 export default function ApplyLoanPage() {
@@ -12,33 +12,59 @@ export default function ApplyLoanPage() {
     amount: "",
     termMonths: "12",
     purpose: "",
+    productId: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [result, setResult] = useState<any>(null);
-
   const [mutationError, setMutationError] = useState("");
+
+  const { data: productsData } = useQuery(GET_ESS_LOAN_PRODUCTS);
+  const products = productsData?.essLoanProducts || [];
+
+  const [checkEligibility, { data: eligibilityData, loading: eligibilityLoading }] =
+    useLazyQuery(CHECK_ESS_LOAN_ELIGIBILITY, { fetchPolicy: "network-only" });
+
+  const eligibility = eligibilityData?.essLoanEligibility;
 
   const [applyForLoan, { loading }] = useMutation(ESS_APPLY_FOR_LOAN, {
     onCompleted: (data) => setResult(data.essApplyForLoan),
     onError: (error) => setMutationError(error.message),
   });
 
+  // Check eligibility when amount, term, and product change
+  useEffect(() => {
+    const amount = parseFloat(formData.amount);
+    const termMonths = parseInt(formData.termMonths);
+    if (amount > 0 && termMonths > 0 && formData.productId) {
+      const timer = setTimeout(() => {
+        checkEligibility({
+          variables: { amount, termMonths, productId: formData.productId },
+        });
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [formData.amount, formData.termMonths, formData.productId, checkEligibility]);
+
   const validate = () => {
     const errs: Record<string, string> = {};
     if (!formData.amount || parseFloat(formData.amount) <= 0) errs.amount = "Enter a valid amount";
     if (!formData.termMonths || parseInt(formData.termMonths) < 1) errs.termMonths = "Enter valid term";
+    if (!formData.productId) errs.productId = "Select a loan product";
+    if (eligibility && !eligibility.eligible) errs.eligibility = "You are not eligible for this loan";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setMutationError("");
     if (!validate()) return;
     applyForLoan({
       variables: {
         amount: parseFloat(formData.amount),
         termMonths: parseInt(formData.termMonths),
         purpose: formData.purpose || undefined,
+        productId: formData.productId,
       },
     });
   };
@@ -88,7 +114,24 @@ export default function ApplyLoanPage() {
         )}
         <div className="flex items-center gap-3 p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
           <CreditCard className="w-5 h-5 text-blue-600" />
-          <p className="text-sm text-blue-600">Your application will be reviewed by a loan officer before approval.</p>
+          <p className="text-sm text-blue-600">Your eligibility will be checked automatically based on your shares and salary.</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-1">Loan Product *</label>
+          <select
+            value={formData.productId}
+            onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
+            className="w-full px-4 py-3 rounded-lg border border-input bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+          >
+            <option value="">Select a product...</option>
+            {products.map((p: any) => (
+              <option key={p.id} value={p.id}>
+                {p.productName} ({(p.interestRate * 100).toFixed(1)}% p.a.)
+              </option>
+            ))}
+          </select>
+          {errors.productId && <p className="text-xs text-destructive mt-1">{errors.productId}</p>}
         </div>
 
         <div>
@@ -133,6 +176,77 @@ export default function ApplyLoanPage() {
           />
         </div>
 
+        {/* Eligibility Check Result */}
+        {eligibilityLoading && (
+          <div className="flex items-center gap-2 text-muted-foreground text-sm p-3">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Checking eligibility...
+          </div>
+        )}
+
+        {eligibility && !eligibilityLoading && (
+          <div className={`rounded-lg border p-4 ${
+            eligibility.eligible
+              ? "bg-green-500/10 border-green-500/20"
+              : "bg-destructive/10 border-destructive/20"
+          }`}>
+            <div className="flex items-center gap-2 mb-3">
+              {eligibility.eligible ? (
+                <ShieldCheck className="w-5 h-5 text-green-600" />
+              ) : (
+                <AlertTriangle className="w-5 h-5 text-destructive" />
+              )}
+              <h3 className={`text-sm font-semibold ${eligibility.eligible ? "text-green-700" : "text-destructive"}`}>
+                {eligibility.eligible ? "Eligible" : "Not Eligible"}
+              </h3>
+            </div>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <span className="text-muted-foreground">Share Value</span>
+                <p className="font-semibold">{formatCurrency(eligibility.shareValue)}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Max by Shares (3x)</span>
+                <p className="font-semibold">{formatCurrency(eligibility.maxByShares)}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Monthly Salary</span>
+                <p className="font-semibold">{formatCurrency(eligibility.monthlySalary)}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Available Capacity/mo</span>
+                <p className="font-semibold">{formatCurrency(eligibility.availableMonthlyCapacity)}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Current Deductions/mo</span>
+                <p className="font-semibold">{formatCurrency(eligibility.currentMonthlyDeductions)}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Proposed Repayment/mo</span>
+                <p className="font-semibold">{formatCurrency(eligibility.proposedMonthlyRepayment)}</p>
+              </div>
+            </div>
+            {eligibility.reasons && eligibility.reasons.length > 0 && (
+              <ul className="mt-3 text-xs space-y-1">
+                {eligibility.reasons.map((r: string, i: number) => (
+                  <li key={i} className={eligibility.eligible ? "text-green-700" : "text-destructive"}>
+                    {r}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {eligibility.maxLoanAmount > 0 && (
+              <p className="mt-2 text-sm font-semibold">
+                Maximum eligible amount: {formatCurrency(eligibility.maxLoanAmount)}
+              </p>
+            )}
+          </div>
+        )}
+
+        {errors.eligibility && (
+          <p className="text-xs text-destructive">{errors.eligibility}</p>
+        )}
+
         {formData.amount && parseFloat(formData.amount) > 0 && (
           <div className="bg-muted/30 rounded-lg p-4">
             <h3 className="text-sm font-semibold text-foreground mb-2">Summary</h3>
@@ -149,7 +263,7 @@ export default function ApplyLoanPage() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || (eligibility && !eligibility.eligible)}
           className="w-full inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-lg transition-colors disabled:opacity-50"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}

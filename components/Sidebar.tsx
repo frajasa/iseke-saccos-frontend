@@ -22,6 +22,7 @@ import {
   Receipt,
   PanelLeftClose,
   PanelLeft,
+  Settings,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -50,6 +51,7 @@ const navigation = [
       { name: "Employers", href: "/dashboard/employers", icon: Factory, roles: ["ADMIN", "MANAGER"] },
       { name: "Payroll", href: "/dashboard/payroll", icon: Receipt, roles: ["ADMIN", "MANAGER"] },
       { name: "Users", href: "/users", icon: UserCog, roles: ["ADMIN", "MANAGER"] },
+      { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["ADMIN"] },
     ],
   },
 ];

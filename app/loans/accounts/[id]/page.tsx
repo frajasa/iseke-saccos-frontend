@@ -9,6 +9,7 @@ import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils";
 import ErrorDisplay from "@/components/ui/ErrorDisplay";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
+import AttachmentUpload from "@/components/AttachmentUpload";
 
 export default function LoanAccountDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -477,6 +478,13 @@ export default function LoanAccountDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Documents / Attachments */}
+      <AttachmentUpload
+        entityType="LOAN"
+        entityId={id}
+        requiredTypes={loan.product?.requiredDocuments?.split(",").map((s: string) => s.trim()).filter(Boolean)}
+      />
 
       {/* Repayment Schedule */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">

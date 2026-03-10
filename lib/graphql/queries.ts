@@ -89,6 +89,7 @@ export const GET_MEMBER = gql`
       membershipDate
       status
       stage
+      shares
       photoPath
       signaturePath
       fingerprintPath
@@ -1354,6 +1355,9 @@ export const GET_ESS_DASHBOARD = gql`
       activeLoans
       activeSavingsAccounts
       monthlyDeductions
+      shares
+      shareValue
+      maxLoanByShares
       recentRequests {
         id
         requestNumber
@@ -1829,5 +1833,129 @@ export const INTER_BRANCH_TRANSFER = gql`
       amount
       status
     }
+  }
+`;
+
+// ===== SACCOS Business Rules =====
+
+export const CHECK_LOAN_ELIGIBILITY = gql`
+  query CheckLoanEligibility($memberId: ID!, $amount: Decimal!, $termMonths: Int!, $productId: ID!) {
+    loanEligibility(memberId: $memberId, amount: $amount, termMonths: $termMonths, productId: $productId) {
+      eligible
+      maxLoanAmount
+      shareValue
+      maxByShares
+      monthlySalary
+      currentMonthlyDeductions
+      availableMonthlyCapacity
+      proposedMonthlyRepayment
+      reasons
+    }
+  }
+`;
+
+export const CHECK_ESS_LOAN_ELIGIBILITY = gql`
+  query CheckEssLoanEligibility($amount: Decimal!, $termMonths: Int!, $productId: ID!) {
+    essLoanEligibility(amount: $amount, termMonths: $termMonths, productId: $productId) {
+      eligible
+      maxLoanAmount
+      shareValue
+      maxByShares
+      monthlySalary
+      currentMonthlyDeductions
+      availableMonthlyCapacity
+      proposedMonthlyRepayment
+      reasons
+    }
+  }
+`;
+
+export const PURCHASE_SHARES = gql`
+  mutation PurchaseShares($memberId: ID!, $quantity: Int!) {
+    purchaseShares(memberId: $memberId, quantity: $quantity) {
+      id
+      memberNumber
+      shares
+    }
+  }
+`;
+
+export const SELL_SHARES = gql`
+  mutation SellShares($memberId: ID!, $quantity: Int!) {
+    sellShares(memberId: $memberId, quantity: $quantity) {
+      id
+      memberNumber
+      shares
+    }
+  }
+`;
+
+export const ESS_PURCHASE_SHARES = gql`
+  mutation EssPurchaseShares($quantity: Int!) {
+    essPurchaseShares(quantity: $quantity) {
+      id
+      memberNumber
+      shares
+    }
+  }
+`;
+
+export const GET_SACCOS_SETTINGS = gql`
+  query GetSaccosSettings {
+    saccosSettings {
+      id
+      settingKey
+      settingValue
+      description
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const UPDATE_SACCOS_SETTING = gql`
+  mutation UpdateSaccosSetting($key: String!, $value: String!, $description: String) {
+    updateSaccosSetting(key: $key, value: $value, description: $description) {
+      id
+      settingKey
+      settingValue
+      description
+    }
+  }
+`;
+
+export const GET_ATTACHMENTS = gql`
+  query GetAttachments($entityType: String!, $entityId: ID!) {
+    attachments(entityType: $entityType, entityId: $entityId) {
+      id
+      entityType
+      entityId
+      documentType
+      fileName
+      filePath
+      fileSize
+      mimeType
+      uploadedBy
+      createdAt
+    }
+  }
+`;
+
+export const ADD_ATTACHMENT = gql`
+  mutation AddAttachment($entityType: String!, $entityId: ID!, $documentType: String!, $filePath: String!, $fileName: String) {
+    addAttachment(entityType: $entityType, entityId: $entityId, documentType: $documentType, filePath: $filePath, fileName: $fileName) {
+      id
+      entityType
+      entityId
+      documentType
+      fileName
+      filePath
+    }
+  }
+`;
+
+export const DELETE_ATTACHMENT = gql`
+  mutation DeleteAttachment($id: ID!) {
+    deleteAttachment(id: $id)
   }
 `;

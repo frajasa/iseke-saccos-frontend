@@ -3,7 +3,7 @@
 import { useQuery } from "@apollo/client/react";
 import { GET_ESS_DASHBOARD } from "@/lib/graphql/queries";
 import { formatCurrency, formatDateTime, getStatusColor } from "@/lib/utils";
-import { Wallet, CreditCard, Receipt, Clock } from "lucide-react";
+import { Wallet, CreditCard, Receipt, Clock, BarChart3, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import ErrorDisplay from "@/components/ui/ErrorDisplay";
 
@@ -76,6 +76,36 @@ export default function MemberDashboardPage() {
             {dashboard.recentRequests?.filter((r: any) => r.status === "PENDING").length || 0}
           </p>
           <p className="text-xs opacity-80 mt-1">awaiting review</p>
+        </div>
+      </div>
+
+      {/* Share Information */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-card rounded-xl border border-border p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Shares Owned</h3>
+            <BarChart3 className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <p className="text-2xl font-bold text-foreground tabular-nums">{dashboard.shares || 0}</p>
+          <p className="text-xs text-muted-foreground mt-1">shares</p>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Share Value</h3>
+            <Wallet className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <p className="text-2xl font-bold text-foreground tabular-nums">{formatCurrency(dashboard.shareValue || 0)}</p>
+          <p className="text-xs text-muted-foreground mt-1">total value</p>
+        </div>
+
+        <div className="bg-card rounded-xl border border-border p-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium text-muted-foreground">Max Loan Eligible</h3>
+            <TrendingUp className="w-5 h-5 text-muted-foreground" />
+          </div>
+          <p className="text-2xl font-bold text-foreground tabular-nums">{formatCurrency(dashboard.maxLoanByShares || 0)}</p>
+          <p className="text-xs text-muted-foreground mt-1">based on shares (3x)</p>
         </div>
       </div>
 

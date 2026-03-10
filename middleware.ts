@@ -76,6 +76,6 @@ export const config = {
      * - public folder
      * - api/auth (NextAuth API routes)
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.svg|api/auth|api/graphql).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.svg|api/auth|api/graphql|api/files).*)",
   ],
 };

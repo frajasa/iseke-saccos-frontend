@@ -292,6 +292,7 @@ export interface Member {
   photoPath?: string;
   signaturePath?: string;
   fingerprintPath?: string;
+  shares?: number;
   branch: Branch;
   savingsAccounts?: SavingsAccount[];
   loanAccounts?: LoanAccount[];
@@ -369,6 +370,8 @@ export interface LoanProduct {
   minimumGuarantors?: number;
   requiresCollateral?: boolean;
   collateralPercentage?: number;
+  shareMultiplier?: number;
+  requiredDocuments?: string;
   status: ProductStatus;
   createdAt: string;
   updatedAt: string;
@@ -377,6 +380,8 @@ export interface LoanProduct {
 export interface Guarantor {
   id: string;
   loanAccount: LoanAccount;
+  guarantorType?: string;
+  employer?: Employer;
   guarantorMember?: Member;
   guarantorName: string;
   guarantorNationalId?: string;
@@ -1036,6 +1041,7 @@ export interface Employer {
   address?: string;
   tinNumber?: string;
   payrollCutoffDay?: number;
+  minimumMonthlyContribution?: number;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -1095,6 +1101,9 @@ export interface EssDashboard {
   activeLoans: number;
   activeSavingsAccounts: number;
   monthlyDeductions: number;
+  shares: number;
+  shareValue: number;
+  maxLoanByShares: number;
   recentRequests: EssServiceRequest[];
 }
 
@@ -1139,4 +1148,64 @@ export interface TransactionApproval {
   status: ApprovalStatus;
   createdAt?: string;
   updatedAt?: string;
+}
+
+// ===== SACCOS Business Rules Types =====
+
+export interface LoanEligibilityResult {
+  eligible: boolean;
+  maxLoanAmount: number;
+  shareValue: number;
+  maxByShares: number;
+  monthlySalary: number;
+  currentMonthlyDeductions: number;
+  availableMonthlyCapacity: number;
+  proposedMonthlyRepayment: number;
+  reasons: string[];
+}
+
+export interface SaccosSetting {
+  id: string;
+  settingKey: string;
+  settingValue: string;
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Attachment {
+  id: string;
+  entityType: string;
+  entityId: string;
+  documentType: string;
+  fileName: string;
+  filePath: string;
+  fileSize?: number;
+  mimeType?: string;
+  uploadedBy?: string;
+  createdAt?: string;
+}
+
+export enum GuarantorType {
+  MEMBER = "MEMBER",
+  EMPLOYER = "EMPLOYER",
+}
+
+export enum DocumentType {
+  PAYSLIP = "PAYSLIP",
+  EMPLOYMENT_LETTER = "EMPLOYMENT_LETTER",
+  ID_COPY = "ID_COPY",
+  CHECK_OFF_LETTER = "CHECK_OFF_LETTER",
+  BANK_STATEMENT = "BANK_STATEMENT",
+  PASSPORT_PHOTO = "PASSPORT_PHOTO",
+  UTILITY_BILL = "UTILITY_BILL",
+  COLLATERAL_DOCUMENT = "COLLATERAL_DOCUMENT",
+  LOAN_APPLICATION_FORM = "LOAN_APPLICATION_FORM",
+  OTHER = "OTHER",
+}
+
+export enum AttachmentEntityType {
+  MEMBER = "MEMBER",
+  LOAN = "LOAN",
+  SERVICE_REQUEST = "SERVICE_REQUEST",
 }

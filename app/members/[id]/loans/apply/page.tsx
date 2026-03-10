@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useMutation, useQuery } from "@apollo/client/react";
-import { APPLY_FOR_LOAN, GET_LOAN_PRODUCTS, GET_MEMBER } from "@/lib/graphql/queries";
+import { useState, useEffect, useRef } from "react";
+import { useMutation, useQuery, useLazyQuery } from "@apollo/client/react";
+import { APPLY_FOR_LOAN, GET_LOAN_PRODUCTS, GET_MEMBER, CHECK_LOAN_ELIGIBILITY } from "@/lib/graphql/queries";
 import { LoanApplicationInput } from "@/lib/types";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Save, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, Save, Loader2, AlertCircle, CheckCircle, XCircle, TrendingUp, Coins, DollarSign } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 
@@ -28,6 +28,10 @@ export default function ApplyForLoanPage() {
 
   const { data: productsData } = useQuery(GET_LOAN_PRODUCTS);
 
+  const [checkEligibility, { data: eligibilityData, loading: eligibilityLoading }] = useLazyQuery(CHECK_LOAN_ELIGIBILITY, {
+    fetchPolicy: "network-only",
+  });
+
   const [applyForLoan, { loading }] = useMutation(APPLY_FOR_LOAN, {
     onCompleted: (data) => {
       router.push(`/loans/accounts/${data.applyForLoan.id}`);
@@ -40,6 +44,22 @@ export default function ApplyForLoanPage() {
   const member = memberData?.member;
   const products = productsData?.loanProducts || [];
   const selectedProduct = products.find((p: any) => p.id === formData.productId);
+  const eligibility = eligibilityData?.loanEligibility;
+
+  // Debounced eligibility check
+  const debounceRef = useRef<NodeJS.Timeout>(null);
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    const amount = parseFloat(formData.requestedAmount);
+    const term = parseInt(formData.termMonths);
+    if (!formData.productId || !amount || amount <= 0 || !term || term <= 0) return;
+    debounceRef.current = setTimeout(() => {
+      checkEligibility({
+        variables: { memberId, amount, termMonths: term, productId: formData.productId },
+      });
+    }, 500);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [formData.requestedAmount, formData.termMonths, formData.productId, memberId]);
 
   const calculateMonthlyPayment = () => {
     if (!formData.requestedAmount || !formData.termMonths || !selectedProduct) return 0;
@@ -319,6 +339,77 @@ export default function ApplyForLoanPage() {
             </div>
           </div>
         </div>
+
+        {/* Eligibility Check Result */}
+        {eligibility && (
+          <div className={`rounded-xl border p-6 ${
+            eligibility.eligible
+              ? "bg-emerald-500/5 border-emerald-500/20"
+              : "bg-destructive/5 border-destructive/20"
+          }`}>
+            <div className="flex items-center gap-3 mb-4">
+              {eligibility.eligible ? (
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
+              ) : (
+                <XCircle className="w-6 h-6 text-destructive" />
+              )}
+              <h3 className="text-lg font-semibold text-foreground">
+                {eligibility.eligible ? "Eligible for Loan" : "Not Eligible"}
+              </h3>
+              {eligibilityLoading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Share Value</p>
+                <p className="text-sm font-semibold">{formatCurrency(eligibility.shareValue)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Max by Shares (3x)</p>
+                <p className="text-sm font-semibold">{formatCurrency(eligibility.maxByShares)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Monthly Salary</p>
+                <p className="text-sm font-semibold">{formatCurrency(eligibility.monthlySalary)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Max Loan Amount</p>
+                <p className="text-sm font-bold text-primary">{formatCurrency(eligibility.maxLoanAmount)}</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Current Deductions</p>
+                <p className="text-sm font-semibold">{formatCurrency(eligibility.currentMonthlyDeductions)}/mo</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Available Capacity (2/3 rule)</p>
+                <p className="text-sm font-semibold">{formatCurrency(eligibility.availableMonthlyCapacity)}/mo</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Proposed Repayment</p>
+                <p className={`text-sm font-semibold ${
+                  eligibility.proposedMonthlyRepayment > eligibility.availableMonthlyCapacity
+                    ? "text-destructive" : "text-emerald-600"
+                }`}>
+                  {formatCurrency(eligibility.proposedMonthlyRepayment)}/mo
+                </p>
+              </div>
+            </div>
+            {eligibility.reasons && eligibility.reasons.length > 0 && (
+              <div className="border-t border-border pt-3 mt-3">
+                <p className="text-xs font-medium text-muted-foreground mb-2">Details:</p>
+                <ul className="space-y-1">
+                  {eligibility.reasons.map((reason: string, i: number) => (
+                    <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                      <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber-500" />
+                      {reason}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Loan Summary */}
         {formData.requestedAmount && formData.termMonths && selectedProduct && monthlyPayment > 0 && (

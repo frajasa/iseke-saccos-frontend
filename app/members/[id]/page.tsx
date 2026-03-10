@@ -5,13 +5,14 @@ import { useQuery, useMutation } from "@apollo/client/react";
 import { GET_MEMBER, GET_MEMBERS, DELETE_MEMBER, GET_MEMBER_SAVINGS_ACCOUNTS, GET_MEMBER_LOAN_ACCOUNTS } from "@/lib/graphql/queries";
 import { Member } from "@/lib/types";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Edit, Trash2, Mail, Phone, MapPin, Briefcase, DollarSign, User, Calendar, AlertCircle } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Mail, Phone, MapPin, Briefcase, DollarSign, User, Calendar, AlertCircle, TrendingUp, Coins } from "lucide-react";
 
 import Link from "next/link";
 import { toast } from "sonner";
 import { formatDate, formatCurrency, calculateAge, getStatusColor } from "@/lib/utils";
 import ErrorDisplay from "@/components/ui/ErrorDisplay";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import AttachmentUpload from "@/components/AttachmentUpload";
 
 export default function MemberDetailPage() {
   const router = useRouter();
@@ -249,6 +250,44 @@ export default function MemberDetailPage() {
         </div>
       )}
 
+      {/* Share Information */}
+      {member.shares !== undefined && (
+        <div className="bg-card rounded-xl border border-border p-6">
+          <h2 className="text-base font-semibold text-foreground mb-4">
+            Share Information
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-primary/5 rounded-lg p-4 border border-primary/10">
+              <div className="flex items-center gap-2 mb-2">
+                <Coins className="w-4 h-4 text-primary" />
+                <p className="text-sm text-muted-foreground">Shares Owned</p>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{member.shares || 0}</p>
+            </div>
+            <div className="bg-success/5 rounded-lg p-4 border border-success/10">
+              <div className="flex items-center gap-2 mb-2">
+                <DollarSign className="w-4 h-4 text-success" />
+                <p className="text-sm text-muted-foreground">Share Value</p>
+              </div>
+              <p className="text-2xl font-bold text-foreground">
+                {formatCurrency((member.shares || 0) * 50000)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">@ TZS 50,000 per share</p>
+            </div>
+            <div className="bg-amber-500/5 rounded-lg p-4 border border-amber-500/10">
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-4 h-4 text-amber-600" />
+                <p className="text-sm text-muted-foreground">Max Loan Eligible</p>
+              </div>
+              <p className="text-2xl font-bold text-foreground">
+                {formatCurrency((member.shares || 0) * 50000 * 3)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">3x share value</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Next of Kin Information */}
       <div className="bg-card rounded-xl border border-border p-6">
         <h2 className="text-base font-semibold text-foreground mb-4">
@@ -307,6 +346,13 @@ export default function MemberDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Member Documents */}
+      <AttachmentUpload
+        entityType="MEMBER"
+        entityId={memberId}
+        title="Member Documents"
+      />
 
       {/* Accounts Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

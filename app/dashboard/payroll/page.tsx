@@ -471,17 +471,31 @@ export default function PayrollPage() {
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
               </FormField>
-              <FormField label="Amount (TZS)" required icon={Banknote} iconColor="bg-emerald-500/10 text-emerald-600">
-                <input
-                  type="number"
-                  min="0"
-                  step="1000"
-                  value={deductionData.amount}
-                  onChange={(e) => setDeductionData({ ...deductionData, amount: e.target.value })}
-                  className="w-full pl-12 pr-4 py-2.5 rounded-lg border border-input bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground tabular-nums"
-                  placeholder="e.g. 150,000"
-                />
-              </FormField>
+              <div>
+                <FormField label="Amount (TZS)" required icon={Banknote} iconColor="bg-emerald-500/10 text-emerald-600">
+                  <input
+                    type="number"
+                    min="0"
+                    step="1000"
+                    value={deductionData.amount}
+                    onChange={(e) => setDeductionData({ ...deductionData, amount: e.target.value })}
+                    className="w-full pl-12 pr-4 py-2.5 rounded-lg border border-input bg-card text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground tabular-nums"
+                    placeholder="e.g. 150,000"
+                  />
+                </FormField>
+                {deductionData.deductionType === "SAVINGS" && (
+                  <p className="text-[11px] text-amber-600 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    Min contribution: TZS 20,000 (or employer-specific minimum). Total deductions must not exceed 2/3 of net salary.
+                  </p>
+                )}
+                {deductionData.deductionType === "LOAN_REPAYMENT" && (
+                  <p className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    Total monthly deductions (savings + loan) must not exceed 2/3 of member&apos;s net salary.
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Row 3: Account Selection */}
