@@ -1959,3 +1959,129 @@ export const DELETE_ATTACHMENT = gql`
     deleteAttachment(id: $id)
   }
 `;
+
+// SRS Compliance: Write-off Loan
+export const WRITE_OFF_LOAN = gql`
+  mutation WriteOffLoan($loanId: ID!, $reason: String!) {
+    writeOffLoan(loanId: $loanId, reason: $reason) {
+      id
+      loanNumber
+      status
+      writeOffReason
+      writeOffDate
+      writtenOffBy
+      outstandingPrincipal
+    }
+  }
+`;
+
+// SRS Compliance: Refinance Loan
+export const REFINANCE_LOAN = gql`
+  mutation RefinanceLoan($loanId: ID!, $newTermMonths: Int!, $newInterestRate: Decimal!, $reason: String!) {
+    refinanceLoan(loanId: $loanId, newTermMonths: $newTermMonths, newInterestRate: $newInterestRate, reason: $reason) {
+      id
+      loanNumber
+      status
+      interestRate
+      termMonths
+      outstandingPrincipal
+    }
+  }
+`;
+
+// SRS Compliance: Inter-Account Transfer
+export const TRANSFER_BETWEEN_ACCOUNTS = gql`
+  mutation TransferBetweenAccounts($fromAccountId: ID!, $toAccountId: ID!, $amount: Decimal!, $description: String) {
+    transferBetweenAccounts(fromAccountId: $fromAccountId, toAccountId: $toAccountId, amount: $amount, description: $description) {
+      id
+      transactionNumber
+      transactionDate
+      amount
+      description
+      status
+    }
+  }
+`;
+
+// SRS Compliance: Duplicate Member Check
+export const CHECK_DUPLICATE_MEMBERS = gql`
+  query CheckDuplicateMembers($firstName: String!, $lastName: String!, $dateOfBirth: Date!, $phoneNumber: String) {
+    checkDuplicateMembers(firstName: $firstName, lastName: $lastName, dateOfBirth: $dateOfBirth, phoneNumber: $phoneNumber) {
+      id
+      memberNumber
+      firstName
+      middleName
+      lastName
+      dateOfBirth
+      phoneNumber
+      nationalId
+      status
+    }
+  }
+`;
+
+// SRS Compliance: Accounting Periods
+export const GET_ACCOUNTING_PERIODS = gql`
+  query GetAccountingPeriods {
+    accountingPeriods {
+      id
+      periodName
+      startDate
+      endDate
+      isClosed
+      closedBy
+      closedAt
+      createdAt
+    }
+  }
+`;
+
+export const CREATE_ACCOUNTING_PERIOD = gql`
+  mutation CreateAccountingPeriod($periodName: String!, $startDate: Date!, $endDate: Date!) {
+    createAccountingPeriod(periodName: $periodName, startDate: $startDate, endDate: $endDate) {
+      id
+      periodName
+      startDate
+      endDate
+      isClosed
+    }
+  }
+`;
+
+export const CLOSE_ACCOUNTING_PERIOD = gql`
+  mutation CloseAccountingPeriod($id: ID!) {
+    closeAccountingPeriod(id: $id) {
+      id
+      periodName
+      isClosed
+      closedBy
+      closedAt
+    }
+  }
+`;
+
+export const REOPEN_ACCOUNTING_PERIOD = gql`
+  mutation ReopenAccountingPeriod($id: ID!) {
+    reopenAccountingPeriod(id: $id) {
+      id
+      periodName
+      isClosed
+    }
+  }
+`;
+
+// SRS Compliance: Loan Officer Performance
+export const GET_LOAN_OFFICER_PERFORMANCE = gql`
+  query GetLoanOfficerPerformance($startDate: Date!, $endDate: Date!) {
+    loanOfficerPerformance(startDate: $startDate, endDate: $endDate) {
+      loanOfficer
+      totalLoans
+      activeLoans
+      delinquentLoans
+      totalDisbursed
+      totalOutstanding
+      portfolioAtRisk
+      parPercentage
+    }
+  }
+`;

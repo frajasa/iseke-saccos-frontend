@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { GET_LOAN_ACCOUNT, GET_LOAN_REPAYMENT_SCHEDULE, GET_LOAN_TRANSACTIONS, APPROVE_LOAN, DISBURSE_LOAN, ADD_GUARANTOR, ADD_COLLATERAL } from "@/lib/graphql/queries";
+import { GET_LOAN_ACCOUNT, GET_LOAN_REPAYMENT_SCHEDULE, GET_LOAN_TRANSACTIONS, APPROVE_LOAN, DISBURSE_LOAN, ADD_GUARANTOR, ADD_COLLATERAL, WRITE_OFF_LOAN, REFINANCE_LOAN } from "@/lib/graphql/queries";
 import { ArrowLeft, DollarSign, Calendar, AlertCircle, ChevronLeft, ChevronRight, Receipt, CheckCircle, Banknote, UserPlus, Shield, Plus } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils";
@@ -38,11 +38,17 @@ export default function LoanAccountDetailPage() {
   const [disburseLoan, { loading: disbursing }] = useMutation(DISBURSE_LOAN, { refetchQueries: refetchAll });
   const [addGuarantor, { loading: addingGuarantor }] = useMutation(ADD_GUARANTOR, { refetchQueries: refetchAll });
   const [addCollateral, { loading: addingCollateral }] = useMutation(ADD_COLLATERAL, { refetchQueries: refetchAll });
+  const [writeOffLoan, { loading: writingOff }] = useMutation(WRITE_OFF_LOAN, { refetchQueries: refetchAll });
+  const [refinanceLoan, { loading: refinancing }] = useMutation(REFINANCE_LOAN, { refetchQueries: refetchAll });
 
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showDisburseModal, setShowDisburseModal] = useState(false);
   const [showGuarantorModal, setShowGuarantorModal] = useState(false);
   const [showCollateralModal, setShowCollateralModal] = useState(false);
+  const [showWriteOffModal, setShowWriteOffModal] = useState(false);
+  const [showRefinanceModal, setShowRefinanceModal] = useState(false);
+  const [writeOffReason, setWriteOffReason] = useState("");
+  const [refinanceForm, setRefinanceForm] = useState({ newTermMonths: "", newInterestRate: "", reason: "" });
   const [approvedAmount, setApprovedAmount] = useState("");
   const [disbursementDate, setDisbursementDate] = useState(new Date().toISOString().split("T")[0]);
   const [guarantorForm, setGuarantorForm] = useState({ guarantorName: "", guarantorPhone: "", guarantorNationalId: "", guaranteedAmount: "", relationship: "" });
@@ -128,6 +134,42 @@ export default function LoanAccountDetailPage() {
     }
   };
 
+  const handleWriteOff = async () => {
+    if (!writeOffReason.trim()) {
+      toast.error("Please provide a reason for write-off");
+      return;
+    }
+    try {
+      await writeOffLoan({ variables: { loanId: id, reason: writeOffReason } });
+      toast.success("Loan written off successfully");
+      setShowWriteOffModal(false);
+      setWriteOffReason("");
+      refetch();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to write off loan");
+    }
+  };
+
+  const handleRefinance = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await refinanceLoan({
+        variables: {
+          loanId: id,
+          newTermMonths: parseInt(refinanceForm.newTermMonths),
+          newInterestRate: parseFloat(refinanceForm.newInterestRate),
+          reason: refinanceForm.reason,
+        },
+      });
+      toast.success("Loan refinanced successfully");
+      setShowRefinanceModal(false);
+      setRefinanceForm({ newTermMonths: "", newInterestRate: "", reason: "" });
+      refetch();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to refinance loan");
+    }
+  };
+
   const loan = data?.loanAccount;
   const transactions = txnData?.loanTransactions || [];
   const scheduleResult = scheduleData?.loanRepaymentSchedule;
@@ -207,6 +249,24 @@ export default function LoanAccountDetailPage() {
               <DollarSign className="w-4 h-4" />
               Make Repayment
             </Link>
+          )}
+          {(loan.status === 'DISBURSED' || loan.status === 'ACTIVE') && (
+            <>
+              <button
+                onClick={() => setShowRefinanceModal(true)}
+                className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors"
+              >
+                <Receipt className="w-4 h-4" />
+                Refinance
+              </button>
+              <button
+                onClick={() => setShowWriteOffModal(true)}
+                className="inline-flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors"
+              >
+                <AlertCircle className="w-4 h-4" />
+                Write Off
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -885,6 +945,85 @@ export default function LoanAccountDetailPage() {
                 {disbursing ? "Disbursing..." : "Disburse"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Write-off Modal */}
+      {showWriteOffModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-foreground mb-2">Write Off Loan</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              This will write off loan {loan.loanNumber} with outstanding balance of {formatCurrency(loan.outstandingPrincipal)}. This action cannot be easily undone.
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-foreground mb-1">Reason for Write-off *</label>
+              <textarea
+                value={writeOffReason}
+                onChange={(e) => setWriteOffReason(e.target.value)}
+                className="w-full border border-input rounded-lg p-2 bg-background text-foreground"
+                rows={3}
+                placeholder="Enter reason for writing off this loan..."
+                required
+              />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={() => setShowWriteOffModal(false)} className="flex-1 px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-all font-medium">Cancel</button>
+              <button onClick={handleWriteOff} disabled={writingOff} className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all font-semibold disabled:opacity-50">
+                {writingOff ? "Processing..." : "Confirm Write Off"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Refinance Modal */}
+      {showRefinanceModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Refinance Loan</h3>
+            <form onSubmit={handleRefinance} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">New Term (months) *</label>
+                <input
+                  type="number"
+                  value={refinanceForm.newTermMonths}
+                  onChange={(e) => setRefinanceForm({ ...refinanceForm, newTermMonths: e.target.value })}
+                  className="w-full border border-input rounded-lg p-2 bg-background text-foreground"
+                  min="1"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">New Interest Rate (%) *</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={refinanceForm.newInterestRate}
+                  onChange={(e) => setRefinanceForm({ ...refinanceForm, newInterestRate: e.target.value })}
+                  className="w-full border border-input rounded-lg p-2 bg-background text-foreground"
+                  min="0"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Reason *</label>
+                <textarea
+                  value={refinanceForm.reason}
+                  onChange={(e) => setRefinanceForm({ ...refinanceForm, reason: e.target.value })}
+                  className="w-full border border-input rounded-lg p-2 bg-background text-foreground"
+                  rows={2}
+                  required
+                />
+              </div>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setShowRefinanceModal(false)} className="flex-1 px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-all font-medium">Cancel</button>
+                <button type="submit" disabled={refinancing} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold disabled:opacity-50">
+                  {refinancing ? "Processing..." : "Refinance Loan"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

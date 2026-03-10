@@ -15,6 +15,8 @@ import {
   ShieldAlert,
   Clock,
   Banknote,
+  Users,
+  Lock,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
@@ -109,6 +111,20 @@ const accountingModules = [
     href: "/dashboard/accounting/end-of-day",
     icon: Clock,
     color: "bg-blue-600",
+  },
+  {
+    name: "Loan Officer Performance",
+    description: "Track loan officer KPIs and portfolio quality",
+    href: "/dashboard/accounting/loan-officer-performance",
+    icon: Users,
+    color: "bg-indigo-600",
+  },
+  {
+    name: "Accounting Periods",
+    description: "Manage fiscal periods and period locking",
+    href: "/dashboard/accounting/periods",
+    icon: Lock,
+    color: "bg-gray-600",
   },
 ];
 

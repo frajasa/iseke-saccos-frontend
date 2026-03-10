@@ -11,6 +11,7 @@ import {
   Wallet,
   CreditCard,
   ArrowLeftRight,
+  ArrowRightLeft,
   Building2,
   LogOut,
   Menu,
@@ -23,6 +24,7 @@ import {
   PanelLeftClose,
   PanelLeft,
   Settings,
+  Lock,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -40,6 +42,7 @@ const navigation = [
       { name: "Savings", href: "/savings", icon: Wallet, roles: ["ADMIN", "MANAGER", "CASHIER"] },
       { name: "Loans", href: "/loans", icon: CreditCard, roles: ["ADMIN", "MANAGER", "LOAN_OFFICER"] },
       { name: "Transactions", href: "/transactions", icon: ArrowLeftRight, roles: ["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT"] },
+      { name: "Transfer", href: "/transactions/transfer", icon: ArrowRightLeft, roles: ["ADMIN", "MANAGER", "CASHIER"] },
       { name: "Payments", href: "/dashboard/payments", icon: Smartphone, roles: ["ADMIN", "MANAGER", "CASHIER"] },
     ],
   },
@@ -52,6 +55,7 @@ const navigation = [
       { name: "Payroll", href: "/dashboard/payroll", icon: Receipt, roles: ["ADMIN", "MANAGER"] },
       { name: "Users", href: "/users", icon: UserCog, roles: ["ADMIN", "MANAGER"] },
       { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["ADMIN"] },
+      { name: "Change Password", href: "/dashboard/change-password", icon: Lock, roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER", "ACCOUNTANT"] },
     ],
   },
 ];

@@ -1209,3 +1209,27 @@ export enum AttachmentEntityType {
   LOAN = "LOAN",
   SERVICE_REQUEST = "SERVICE_REQUEST",
 }
+
+// SRS Compliance Types
+export interface AccountingPeriod {
+  id: string;
+  periodName: string;
+  startDate: string;
+  endDate: string;
+  isClosed: boolean;
+  closedBy?: string;
+  closedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface LoanOfficerPerformance {
+  loanOfficer: string;
+  totalLoans: number;
+  activeLoans: number;
+  delinquentLoans: number;
+  totalDisbursed: number;
+  totalOutstanding: number;
+  portfolioAtRisk: number;
+  parPercentage: number;
+}
