@@ -94,9 +94,9 @@ export default function LoanSchedulePage() {
                   <tr key={item.id} className="border-t border-border hover:bg-muted/20 transition-colors">
                     <td className="py-3 px-4 text-sm text-center font-medium">{item.installmentNumber}</td>
                     <td className="py-3 px-4 text-sm">{formatDate(item.dueDate)}</td>
-                    <td className="py-3 px-4 text-sm text-right tabular-nums">{formatCurrency(item.principalAmount)}</td>
-                    <td className="py-3 px-4 text-sm text-right tabular-nums">{formatCurrency(item.interestAmount)}</td>
-                    <td className="py-3 px-4 text-sm text-right font-semibold tabular-nums">{formatCurrency(item.totalAmount)}</td>
+                    <td className="py-3 px-4 text-sm text-right tabular-nums">{formatCurrency(item.principalDue)}</td>
+                    <td className="py-3 px-4 text-sm text-right tabular-nums">{formatCurrency(item.interestDue)}</td>
+                    <td className="py-3 px-4 text-sm text-right font-semibold tabular-nums">{formatCurrency(item.totalDue)}</td>
                     <td className="py-3 px-4 text-sm text-right tabular-nums text-green-600">{formatCurrency(item.totalPaid)}</td>
                     <td className="py-3 px-4 text-center">
                       <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-medium ${statusStyle(item.status)}`}>

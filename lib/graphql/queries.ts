@@ -1646,9 +1646,9 @@ export const GET_ESS_LOAN_REPAYMENT_SCHEDULE = gql`
         id
         installmentNumber
         dueDate
-        principalAmount
-        interestAmount
-        totalAmount
+        principalDue
+        interestDue
+        totalDue
         totalPaid
         status
         paymentDate
