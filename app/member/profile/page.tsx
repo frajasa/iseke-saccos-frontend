@@ -56,10 +56,10 @@ export default function MemberProfilePage() {
         { icon: User, label: "Status", value: member.status || "-" },
       ],
     },
-    ...(member.employer ? [{
+    ...(member.employerEntity ? [{
       title: "Employment Information",
       items: [
-        { icon: Briefcase, label: "Employer", value: member.employer.employerName },
+        { icon: Briefcase, label: "Employer", value: member.employerEntity.employerName },
         { icon: Hash, label: "Employee Number", value: member.employeeNumber || "-" },
         { icon: Building2, label: "Department", value: member.department || "-" },
       ],
@@ -77,8 +77,8 @@ export default function MemberProfilePage() {
           <div>
             <h1 className="text-2xl font-bold">{fullName}</h1>
             <p className="text-sm opacity-90 mt-0.5">Member #{member.memberNumber}</p>
-            {member.employer && (
-              <p className="text-sm opacity-80">{member.employer.employerName}</p>
+            {member.employerEntity && (
+              <p className="text-sm opacity-80">{member.employerEntity.employerName}</p>
             )}
           </div>
         </div>

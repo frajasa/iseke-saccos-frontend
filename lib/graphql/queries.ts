@@ -1610,7 +1610,7 @@ export const GET_ESS_PROFILE = gql`
         id
         branchName
       }
-      employer {
+      employerEntity {
         id
         employerName
       }
