@@ -37,6 +37,7 @@ export const LOGIN = gql`
         fullName
         email
         role
+        permissions
         passwordExpiresAt
         forcePasswordChange
         branch {
@@ -2082,6 +2083,362 @@ export const GET_LOAN_OFFICER_PERFORMANCE = gql`
       totalOutstanding
       portfolioAtRisk
       parPercentage
+    }
+  }
+`;
+
+// ===== Multi-Currency =====
+
+export const GET_CURRENCIES = gql`
+  query GetCurrencies {
+    currencies {
+      id
+      currencyCode
+      currencyName
+      symbol
+      decimalPlaces
+      isBaseCurrency
+      isActive
+    }
+  }
+`;
+
+export const GET_EXCHANGE_RATES = gql`
+  query GetExchangeRates($fromCurrency: String!, $toCurrency: String!) {
+    exchangeRates(fromCurrency: $fromCurrency, toCurrency: $toCurrency) {
+      id
+      fromCurrencyCode
+      toCurrencyCode
+      rate
+      effectiveDate
+      expiryDate
+      source
+      createdAt
+    }
+  }
+`;
+
+export const CONVERT_CURRENCY = gql`
+  query ConvertCurrency($amount: Decimal!, $fromCurrency: String!, $toCurrency: String!, $date: Date) {
+    convertCurrency(amount: $amount, fromCurrency: $fromCurrency, toCurrency: $toCurrency, date: $date)
+  }
+`;
+
+export const CREATE_CURRENCY = gql`
+  mutation CreateCurrency($currencyCode: String!, $currencyName: String!, $symbol: String, $decimalPlaces: Int) {
+    createCurrency(currencyCode: $currencyCode, currencyName: $currencyName, symbol: $symbol, decimalPlaces: $decimalPlaces) {
+      id
+      currencyCode
+      currencyName
+      symbol
+      isActive
+    }
+  }
+`;
+
+export const UPDATE_CURRENCY = gql`
+  mutation UpdateCurrency($id: ID!, $currencyName: String, $symbol: String, $isActive: Boolean) {
+    updateCurrency(id: $id, currencyName: $currencyName, symbol: $symbol, isActive: $isActive) {
+      id
+      currencyCode
+      currencyName
+      symbol
+      isActive
+    }
+  }
+`;
+
+export const SET_EXCHANGE_RATE = gql`
+  mutation SetExchangeRate($fromCurrency: String!, $toCurrency: String!, $rate: Decimal!, $effectiveDate: Date, $expiryDate: Date, $source: String) {
+    setExchangeRate(fromCurrency: $fromCurrency, toCurrency: $toCurrency, rate: $rate, effectiveDate: $effectiveDate, expiryDate: $expiryDate, source: $source) {
+      id
+      fromCurrencyCode
+      toCurrencyCode
+      rate
+      effectiveDate
+    }
+  }
+`;
+
+// ===== Transaction Limits =====
+
+export const GET_TRANSACTION_LIMITS = gql`
+  query GetTransactionLimits {
+    transactionLimits {
+      id
+      role
+      transactionType
+      dailyLimit
+      singleTransactionLimit
+      monthlyLimit
+      requiresApprovalAbove
+      isActive
+    }
+  }
+`;
+
+export const SET_TRANSACTION_LIMIT = gql`
+  mutation SetTransactionLimit($role: String!, $transactionType: String!, $dailyLimit: Decimal, $singleTransactionLimit: Decimal, $monthlyLimit: Decimal, $requiresApprovalAbove: Decimal) {
+    setTransactionLimit(role: $role, transactionType: $transactionType, dailyLimit: $dailyLimit, singleTransactionLimit: $singleTransactionLimit, monthlyLimit: $monthlyLimit, requiresApprovalAbove: $requiresApprovalAbove) {
+      id
+      role
+      transactionType
+      dailyLimit
+      singleTransactionLimit
+      monthlyLimit
+      requiresApprovalAbove
+    }
+  }
+`;
+
+export const DELETE_TRANSACTION_LIMIT = gql`
+  mutation DeleteTransactionLimit($id: ID!) {
+    deleteTransactionLimit(id: $id)
+  }
+`;
+
+// ===== Session Restrictions =====
+
+export const GET_SESSION_RESTRICTIONS = gql`
+  query GetSessionRestrictions {
+    sessionRestrictions {
+      id
+      role
+      maxConcurrentSessions
+      allowedLoginStart
+      allowedLoginEnd
+      allowedDays
+      sessionTimeoutMinutes
+      isActive
+    }
+  }
+`;
+
+export const UPDATE_SESSION_RESTRICTION = gql`
+  mutation UpdateSessionRestriction($id: ID!, $maxConcurrentSessions: Int, $allowedLoginStart: String, $allowedLoginEnd: String, $allowedDays: String, $sessionTimeoutMinutes: Int) {
+    updateSessionRestriction(id: $id, maxConcurrentSessions: $maxConcurrentSessions, allowedLoginStart: $allowedLoginStart, allowedLoginEnd: $allowedLoginEnd, allowedDays: $allowedDays, sessionTimeoutMinutes: $sessionTimeoutMinutes) {
+      id
+      role
+      maxConcurrentSessions
+      allowedLoginStart
+      allowedLoginEnd
+      allowedDays
+      sessionTimeoutMinutes
+    }
+  }
+`;
+
+export const TERMINATE_USER_SESSIONS = gql`
+  mutation TerminateUserSessions($userId: ID!) {
+    terminateUserSessions(userId: $userId)
+  }
+`;
+
+// ===== Batch Import =====
+
+export const GET_BATCH_IMPORTS = gql`
+  query GetBatchImports {
+    batchImports {
+      id
+      batchNumber
+      fileName
+      importType
+      totalRecords
+      successfulRecords
+      failedRecords
+      totalAmount
+      status
+      uploadedBy
+      processedBy
+      uploadedAt
+      processedAt
+    }
+  }
+`;
+
+export const GET_BATCH_IMPORT = gql`
+  query GetBatchImport($id: ID!) {
+    batchImport(id: $id) {
+      id
+      batchNumber
+      fileName
+      importType
+      totalRecords
+      successfulRecords
+      failedRecords
+      totalAmount
+      status
+      errorDetails
+      uploadedBy
+      processedBy
+      uploadedAt
+      processedAt
+    }
+  }
+`;
+
+export const GET_BATCH_IMPORT_ITEMS = gql`
+  query GetBatchImportItems($batchId: ID!) {
+    batchImportItems(batchId: $batchId) {
+      id
+      rowNumber
+      accountNumber
+      memberNumber
+      amount
+      transactionType
+      paymentMethod
+      referenceNumber
+      description
+      status
+      errorMessage
+      transactionId
+    }
+  }
+`;
+
+export const CREATE_BATCH_IMPORT = gql`
+  mutation CreateBatchImport($fileName: String!, $importType: String!, $rows: [JSON!]!) {
+    createBatchImport(fileName: $fileName, importType: $importType, rows: $rows) {
+      id
+      batchNumber
+      totalRecords
+      status
+    }
+  }
+`;
+
+export const PROCESS_BATCH_IMPORT = gql`
+  mutation ProcessBatchImport($batchId: ID!) {
+    processBatchImport(batchId: $batchId) {
+      id
+      batchNumber
+      successfulRecords
+      failedRecords
+      status
+      processedAt
+    }
+  }
+`;
+
+// ===== Passbook / Receipt Printing =====
+
+export const GET_TRANSACTION_RECEIPT = gql`
+  query GetTransactionReceipt($transactionId: String!) {
+    transactionReceipt(transactionId: $transactionId)
+  }
+`;
+
+export const GET_PASSBOOK_ENTRIES = gql`
+  query GetPassbookEntries($accountId: ID!, $startDate: Date, $endDate: Date) {
+    passbookEntries(accountId: $accountId, startDate: $startDate, endDate: $endDate)
+  }
+`;
+
+export const GET_LOAN_STATEMENT = gql`
+  query GetLoanStatement($loanId: ID!) {
+    loanStatement(loanId: $loanId)
+  }
+`;
+
+// ===== Roles & Permissions =====
+
+export const GET_ROLES = gql`
+  query GetRoles {
+    roles {
+      id
+      name
+      displayName
+      description
+      isSystemRole
+      isActive
+      permissions {
+        id
+        name
+        displayName
+        module
+      }
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_ACTIVE_ROLES = gql`
+  query GetActiveRoles {
+    activeRoles {
+      id
+      name
+      displayName
+      description
+      isSystemRole
+      isActive
+      permissions {
+        id
+        name
+        displayName
+        module
+      }
+    }
+  }
+`;
+
+export const GET_PERMISSIONS = gql`
+  query GetPermissions {
+    permissions {
+      id
+      name
+      displayName
+      description
+      module
+    }
+  }
+`;
+
+export const GET_PERMISSION_MODULES = gql`
+  query GetPermissionModules {
+    permissionModules
+  }
+`;
+
+export const CREATE_ROLE = gql`
+  mutation CreateRole($name: String!, $displayName: String!, $description: String) {
+    createRole(name: $name, displayName: $displayName, description: $description) {
+      id
+      name
+      displayName
+    }
+  }
+`;
+
+export const UPDATE_ROLE = gql`
+  mutation UpdateRole($id: ID!, $displayName: String, $description: String, $isActive: Boolean) {
+    updateRole(id: $id, displayName: $displayName, description: $description, isActive: $isActive) {
+      id
+      name
+      displayName
+      isActive
+    }
+  }
+`;
+
+export const DELETE_ROLE = gql`
+  mutation DeleteRole($id: ID!) {
+    deleteRole(id: $id)
+  }
+`;
+
+export const ASSIGN_PERMISSIONS = gql`
+  mutation AssignPermissions($roleId: ID!, $permissionIds: [ID!]!) {
+    assignPermissions(roleId: $roleId, permissionIds: $permissionIds) {
+      id
+      name
+      displayName
+      permissions {
+        id
+        name
+        displayName
+        module
+      }
     }
   }
 `;

@@ -25,37 +25,51 @@ import {
   PanelLeft,
   Settings,
   Lock,
+  Coins,
+  ShieldCheck,
+  Clock,
+  Upload,
+  Printer,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { Shield } from "lucide-react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
+// Each nav item requires at least one of the listed permissions to be visible
 const navigation = [
   {
     label: "MAIN",
     items: [
-      { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER", "ACCOUNTANT"] },
-      { name: "Members", href: "/members", icon: Users, roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER"] },
+      { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, permissions: ["VIEW_DASHBOARD"], roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER", "ACCOUNTANT"] },
+      { name: "Members", href: "/members", icon: Users, permissions: ["VIEW_MEMBERS"], roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER"] },
     ],
   },
   {
     label: "FINANCE",
     items: [
-      { name: "Savings", href: "/savings", icon: Wallet, roles: ["ADMIN", "MANAGER", "CASHIER"] },
-      { name: "Loans", href: "/loans", icon: CreditCard, roles: ["ADMIN", "MANAGER", "LOAN_OFFICER"] },
-      { name: "Transactions", href: "/transactions", icon: ArrowLeftRight, roles: ["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT"] },
-      { name: "Transfer", href: "/transactions/transfer", icon: ArrowRightLeft, roles: ["ADMIN", "MANAGER", "CASHIER"] },
-      { name: "Payments", href: "/dashboard/payments", icon: Smartphone, roles: ["ADMIN", "MANAGER", "CASHIER"] },
+      { name: "Savings", href: "/savings", icon: Wallet, permissions: ["VIEW_SAVINGS"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
+      { name: "Loans", href: "/loans", icon: CreditCard, permissions: ["VIEW_LOANS"], roles: ["ADMIN", "MANAGER", "LOAN_OFFICER"] },
+      { name: "Transactions", href: "/transactions", icon: ArrowLeftRight, permissions: ["VIEW_TRANSACTIONS"], roles: ["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT"] },
+      { name: "Transfer", href: "/transactions/transfer", icon: ArrowRightLeft, permissions: ["TRANSFER_ACCOUNTS"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
+      { name: "Payments", href: "/dashboard/payments", icon: Smartphone, permissions: ["VIEW_PAYMENTS"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
     ],
   },
   {
     label: "MANAGEMENT",
     items: [
-      { name: "Accounting", href: "/dashboard/accounting", icon: Calculator, roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
-      { name: "Branches", href: "/branches", icon: Building2, roles: ["ADMIN", "MANAGER"] },
-      { name: "Employers", href: "/dashboard/employers", icon: Factory, roles: ["ADMIN", "MANAGER"] },
-      { name: "Payroll", href: "/dashboard/payroll", icon: Receipt, roles: ["ADMIN", "MANAGER"] },
-      { name: "Users", href: "/users", icon: UserCog, roles: ["ADMIN", "MANAGER"] },
-      { name: "Settings", href: "/dashboard/settings", icon: Settings, roles: ["ADMIN"] },
-      { name: "Change Password", href: "/dashboard/change-password", icon: Lock, roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER", "ACCOUNTANT"] },
+      { name: "Accounting", href: "/dashboard/accounting", icon: Calculator, permissions: ["VIEW_ACCOUNTING"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
+      { name: "Branches", href: "/branches", icon: Building2, permissions: ["VIEW_BRANCHES", "MANAGE_BRANCHES"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Employers", href: "/dashboard/employers", icon: Factory, permissions: ["MANAGE_PAYROLL"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Payroll", href: "/dashboard/payroll", icon: Receipt, permissions: ["VIEW_PAYROLL", "MANAGE_PAYROLL"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Users", href: "/users", icon: UserCog, permissions: ["VIEW_USERS"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Roles", href: "/dashboard/roles", icon: Shield, permissions: ["MANAGE_ROLES"], roles: ["ADMIN"] },
+      { name: "Currencies", href: "/dashboard/currencies", icon: Coins, permissions: ["VIEW_CURRENCIES", "MANAGE_CURRENCIES"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
+      { name: "Txn Limits", href: "/dashboard/transaction-limits", icon: ShieldCheck, permissions: ["MANAGE_TRANSACTION_LIMITS"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Sessions", href: "/dashboard/session-restrictions", icon: Clock, permissions: ["MANAGE_SESSION_RESTRICTIONS"], roles: ["ADMIN"] },
+      { name: "Batch Import", href: "/dashboard/batch-import", icon: Upload, permissions: ["MANAGE_BATCH_IMPORTS"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
+      { name: "Passbook", href: "/dashboard/passbook", icon: Printer, permissions: ["VIEW_PASSBOOK"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
+      { name: "Settings", href: "/dashboard/settings", icon: Settings, permissions: ["MANAGE_SETTINGS"], roles: ["ADMIN"] },
+      { name: "Change Password", href: "/dashboard/change-password", icon: Lock, permissions: [], roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER", "ACCOUNTANT"] },
     ],
   },
 ];
@@ -69,14 +83,23 @@ export default function Sidebar() {
 
   const user = session?.user as any;
 
+  const userPermissions: string[] = user?.permissions || [];
+
   // Build a flat list for active-link disambiguation
   const allItems = navigation.flatMap((g) => g.items);
   const filteredGroups = navigation
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) =>
-        user?.role ? item.roles.includes(user.role) : false
-      ),
+      items: group.items.filter((item) => {
+        // If user has permissions loaded, use permission-based filtering
+        if (userPermissions.length > 0) {
+          // Items with empty permissions array are always visible (e.g., Change Password)
+          if (item.permissions.length === 0) return true;
+          return item.permissions.some((p) => userPermissions.includes(p));
+        }
+        // Fallback to role-based filtering
+        return user?.role ? item.roles.includes(user.role) : false;
+      }),
     }))
     .filter((g) => g.items.length > 0);
 
@@ -169,9 +192,14 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Collapse toggle (desktop only) */}
-      {!mobile && (
-        <div className="px-3 py-2 border-t border-border">
+      {/* Language Switcher + Collapse toggle */}
+      <div className="px-3 py-2 border-t border-border space-y-1">
+        {(!isCollapsed || mobile) && (
+          <div className="flex justify-center">
+            <LanguageSwitcher />
+          </div>
+        )}
+        {!mobile && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="flex items-center justify-center w-full gap-2 px-3 py-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors text-xs font-medium"
@@ -179,8 +207,8 @@ export default function Sidebar() {
             {isCollapsed ? <PanelLeft className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
             {!isCollapsed && <span>Collapse</span>}
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* User Info & Logout */}
       <div className={cn("border-t border-border p-3 shrink-0", isCollapsed && !mobile && "px-2")}>

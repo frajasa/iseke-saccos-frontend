@@ -13,7 +13,7 @@ import {
   DELETE_USER,
   RESET_PASSWORD
 } from "@/lib/graphql/users";
-import { GET_BRANCHES, GET_MEMBERS } from "@/lib/graphql/queries";
+import { GET_BRANCHES, GET_MEMBERS, GET_ACTIVE_ROLES } from "@/lib/graphql/queries";
 import { Plus, Edit, Trash2, UserCheck, UserX, Key, ShieldAlert, X } from "lucide-react";
 import { toast } from "sonner";
 import ErrorDisplay from "@/components/ui/ErrorDisplay";
@@ -405,6 +405,7 @@ interface UserFormModalProps {
 
 function UserFormModal({ mode, user, onClose, onSubmit }: UserFormModalProps) {
   const { data: branchesData } = useQuery(GET_BRANCHES);
+  const { data: rolesData } = useQuery(GET_ACTIVE_ROLES);
   const { data: membersData } = useQuery(GET_MEMBERS, {
     variables: { page: 0, size: 1000, status: "ACTIVE" },
   });
@@ -556,12 +557,9 @@ function UserFormModal({ mode, user, onClose, onSubmit }: UserFormModalProps) {
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                 className={inputClass}
               >
-                <option value="ADMIN">Admin</option>
-                <option value="MANAGER">Manager</option>
-                <option value="CASHIER">Cashier</option>
-                <option value="LOAN_OFFICER">Loan Officer</option>
-                <option value="ACCOUNTANT">Accountant</option>
-                <option value="MEMBER">Member</option>
+                {(rolesData?.activeRoles || []).map((r: any) => (
+                  <option key={r.id} value={r.name}>{r.displayName}</option>
+                ))}
               </select>
             </div>
 

@@ -227,6 +227,27 @@ export enum JournalEntryType {
 }
 
 // Interfaces
+export interface Role {
+  id: string;
+  name: string;
+  displayName: string;
+  description?: string;
+  isSystemRole: boolean;
+  isActive: boolean;
+  permissions: Permission[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  displayName: string;
+  description?: string;
+  module: string;
+  createdAt?: string;
+}
+
 export interface User {
   id: string;
   username: string;
@@ -237,6 +258,8 @@ export interface User {
   fullName: string;
   phoneNumber: string;
   role: UserRole;
+  roleEntity?: Role;
+  permissions?: string[];
   isActive: boolean;
   branch: Branch;
   passwordExpiresAt?: string;
@@ -1232,4 +1255,92 @@ export interface LoanOfficerPerformance {
   totalOutstanding: number;
   portfolioAtRisk: number;
   parPercentage: number;
+}
+
+// Multi-Currency Types
+export interface Currency {
+  id: string;
+  currencyCode: string;
+  currencyName: string;
+  symbol?: string;
+  decimalPlaces: number;
+  isBaseCurrency: boolean;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ExchangeRate {
+  id: string;
+  fromCurrencyCode: string;
+  toCurrencyCode: string;
+  rate: number;
+  effectiveDate: string;
+  expiryDate?: string;
+  source?: string;
+  createdBy?: string;
+  createdAt?: string;
+}
+
+// Transaction Limits
+export interface TransactionLimit {
+  id: string;
+  role: string;
+  transactionType: string;
+  dailyLimit?: number;
+  singleTransactionLimit?: number;
+  monthlyLimit?: number;
+  requiresApprovalAbove?: number;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Session Restrictions
+export interface SessionRestriction {
+  id: string;
+  role: string;
+  maxConcurrentSessions?: number;
+  allowedLoginStart?: string;
+  allowedLoginEnd?: string;
+  allowedDays?: string;
+  sessionTimeoutMinutes?: number;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Batch Import
+export interface BatchImport {
+  id: string;
+  batchNumber: string;
+  fileName: string;
+  importType: string;
+  totalRecords: number;
+  successfulRecords: number;
+  failedRecords: number;
+  totalAmount?: number;
+  status: string;
+  errorDetails?: string;
+  uploadedBy?: string;
+  processedBy?: string;
+  uploadedAt?: string;
+  processedAt?: string;
+  createdAt?: string;
+}
+
+export interface BatchImportItem {
+  id: string;
+  rowNumber: number;
+  accountNumber?: string;
+  memberNumber?: string;
+  amount?: number;
+  transactionType?: string;
+  paymentMethod?: string;
+  referenceNumber?: string;
+  description?: string;
+  status: string;
+  errorMessage?: string;
+  transactionId?: string;
+  createdAt?: string;
 }

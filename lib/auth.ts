@@ -14,6 +14,7 @@ interface LoginResponse {
       lastName: string;
       fullName: string;
       role: string;
+      permissions?: string[];
       linkedMemberId?: string;
       branch?: {
         id: string;
@@ -55,6 +56,7 @@ export const authOptions: NextAuthOptions = {
                       lastName
                       fullName
                       role
+                      permissions
                       linkedMemberId
                       branch {
                         id
@@ -92,6 +94,7 @@ export const authOptions: NextAuthOptions = {
               firstName: loginData.login.user.firstName,
               lastName: loginData.login.user.lastName,
               role: loginData.login.user.role,
+              permissions: loginData.login.user.permissions || [],
               linkedMemberId: loginData.login.user.linkedMemberId,
               branch: loginData.login.user.branch,
               accessToken: loginData.login.token,
@@ -126,6 +129,7 @@ export const authOptions: NextAuthOptions = {
         token.firstName = (user as any).firstName;
         token.lastName = (user as any).lastName;
         token.role = (user as any).role;
+        token.permissions = (user as any).permissions;
         token.linkedMemberId = (user as any).linkedMemberId;
         token.branch = (user as any).branch;
         token.accessToken = (user as any).accessToken;
@@ -139,6 +143,7 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).firstName = token.firstName;
         (session.user as any).lastName = token.lastName;
         (session.user as any).role = token.role;
+        (session.user as any).permissions = token.permissions;
         (session.user as any).linkedMemberId = token.linkedMemberId;
         (session.user as any).branch = token.branch;
         (session as any).accessToken = token.accessToken;
