@@ -121,6 +121,14 @@ function makeClient() {
     }
   });
 
+  // Standard merge policy for paginated queries — always replace (no infinite scroll)
+  const paginatedMerge = {
+    keyArgs: false as const,
+    merge(_existing: any, incoming: any) {
+      return incoming;
+    },
+  };
+
   return new ApolloClient({
     cache: new InMemoryCache({
       typePolicies: {
@@ -128,7 +136,7 @@ function makeClient() {
           fields: {
             members: {
               keyArgs: ["status", "searchTerm"],
-              merge(existing, incoming, { args }) {
+              merge(existing: any, incoming: any, { args }: any) {
                 if (!existing) return incoming;
                 if (args?.page === 0) return incoming;
                 return {
@@ -140,6 +148,13 @@ function makeClient() {
                 };
               },
             },
+            searchMembers: paginatedMerge,
+            loanAccounts: paginatedMerge,
+            loanRepaymentSchedule: paginatedMerge,
+            auditLogs: paginatedMerge,
+            paymentRequests: paginatedMerge,
+            memberPaymentRequests: paginatedMerge,
+            essLoanRepaymentSchedule: paginatedMerge,
           },
         },
       },

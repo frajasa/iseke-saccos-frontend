@@ -14,6 +14,10 @@ COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# NEXT_PUBLIC_* vars are baked at build time — pass via --build-arg
+ARG NEXT_PUBLIC_GRAPHQL_URL=http://localhost:8080/graphql
+ENV NEXT_PUBLIC_GRAPHQL_URL=$NEXT_PUBLIC_GRAPHQL_URL
+
 RUN npm run build
 
 # Stage 3: Production

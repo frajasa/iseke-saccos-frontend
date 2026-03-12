@@ -28,12 +28,12 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.warn("[GraphQL Proxy] Backend unreachable:", error.message);
+    console.error("[GraphQL Proxy] Backend unreachable at", BACKEND_GRAPHQL_URL, ":", error.message);
     return NextResponse.json(
       {
         errors: [
           {
-            message: "Backend server is not reachable. Please try again later.",
+            message: `Backend server is not reachable at ${BACKEND_GRAPHQL_URL}. Please try again later.`,
           },
         ],
       },
