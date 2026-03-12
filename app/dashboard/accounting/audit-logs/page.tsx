@@ -6,6 +6,8 @@ import { GET_AUDIT_LOGS } from "@/lib/graphql/queries";
 import { ArrowLeft, Shield, Calendar, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { formatDateTime } from "@/lib/utils";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 
 const PAGE_SIZE = 20;
 
@@ -42,17 +44,46 @@ export default function AuditLogsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
-          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-        </Link>
-        <div className="p-3 bg-indigo-500/10 rounded-lg">
-          <Shield className="w-6 h-6 text-indigo-600" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <div className="p-3 bg-indigo-500/10 rounded-lg">
+            <Shield className="w-6 h-6 text-indigo-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Audit Trail</h1>
+            <p className="text-muted-foreground">Track all system actions and changes</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Audit Trail</h1>
-          <p className="text-muted-foreground">Track all system actions and changes</p>
-        </div>
+        <ExportDropdown
+          onExport={(format) => {
+            const exportOptions: ExportOptions = {
+              title: "Audit Trail",
+              subtitle: `${startDate} to ${endDate}${entityType ? ` | Entity: ${entityType}` : ""}`,
+              filename: "audit-logs",
+              columns: [
+                { header: "Timestamp", key: "timestamp", width: 22, format: "date" },
+                { header: "User", key: "user", width: 20 },
+                { header: "Action", key: "action", width: 18 },
+                { header: "Entity Type", key: "entityType", width: 16 },
+                { header: "Entity ID", key: "entityId", width: 20 },
+                { header: "IP Address", key: "ipAddress", width: 16 },
+              ],
+              data: logs.map((log: any) => ({
+                timestamp: log.timestamp,
+                user: log.user?.fullName || log.user?.username || "System",
+                action: log.action,
+                entityType: log.entityType,
+                entityId: log.entityId || "-",
+                ipAddress: log.ipAddress || "-",
+              })),
+            };
+            handleExport(format, exportOptions, "print-report");
+          }}
+          disabled={logs.length === 0}
+        />
       </div>
 
       {/* Filters */}
@@ -110,7 +141,7 @@ export default function AuditLogsPage() {
       </div>
 
       {/* Audit Log Table */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
+      <div id="print-report" className="bg-card border border-border rounded-lg overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-muted-foreground">
             Loading audit logs...

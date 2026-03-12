@@ -8,8 +8,10 @@ import {
   GET_MEMBER_STATEMENT,
 } from "@/lib/graphql/queries";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { ArrowLeft, FileText, Search, Calendar, Printer, Download, User } from "lucide-react";
+import { ArrowLeft, FileText, Search, Calendar, User } from "lucide-react";
 import Link from "next/link";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 
 export default function MemberStatementPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -67,16 +69,38 @@ export default function MemberStatementPage() {
           </div>
         </div>
         {statement && (
-          <div className="flex gap-2">
-            <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-              <Printer className="w-4 h-4" />
-              Print
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-              <Download className="w-4 h-4" />
-              Export
-            </button>
-          </div>
+          <ExportDropdown
+            onExport={(format) => {
+              const memberName = statement.member?.fullName || "Member";
+              const transactions = statement.transactions || [];
+              const exportOptions: ExportOptions = {
+                title: `Member Statement - ${memberName}`,
+                subtitle: `${statement.member?.memberNumber || ""} | Period: ${statement.period || `${startDate} to ${endDate}`}`,
+                filename: "member-statement",
+                columns: [
+                  { header: "Date", key: "transactionDate", width: 14, format: "date" },
+                  { header: "Reference", key: "transactionNumber", width: 16 },
+                  { header: "Description", key: "description", width: 28 },
+                  { header: "Type", key: "transactionType", width: 16 },
+                  { header: "Amount", key: "amount", width: 16, format: "currency" },
+                  { header: "Balance", key: "balanceAfter", width: 16, format: "currency" },
+                ],
+                data: transactions.map((tx: any) => ({
+                  transactionDate: tx.transactionDate,
+                  transactionNumber: tx.transactionNumber || "",
+                  description: tx.description || "",
+                  transactionType: tx.transactionType?.replace(/_/g, " ") || "",
+                  amount: tx.amount,
+                  balanceAfter: tx.balanceAfter,
+                })),
+                summary: [
+                  { label: "Opening Balance", value: formatCurrency(statement.openingBalance || 0) },
+                  { label: "Closing Balance", value: formatCurrency(statement.closingBalance || 0) },
+                ],
+              };
+              handleExport(format, exportOptions, "print-report");
+            }}
+          />
         )}
       </div>
 
@@ -201,7 +225,7 @@ export default function MemberStatementPage() {
           Error: {statementError.message}
         </div>
       ) : statement ? (
-        <div className="bg-card border border-border rounded-lg p-6">
+        <div id="print-report" className="bg-card border border-border rounded-lg p-6">
           {/* Statement Header */}
           <div className="text-center mb-6 pb-4 border-b border-border">
             <h2 className="text-xl font-bold text-foreground">ISEKE SACCOS</h2>

@@ -6,6 +6,8 @@ import { GET_PORTFOLIO_SUMMARY, GET_BRANCHES } from "@/lib/graphql/queries";
 import { formatCurrency } from "@/lib/utils";
 import { ArrowLeft, PieChart, Calendar, Building2, TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
 import Link from "next/link";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 
 export default function PortfolioSummaryPage() {
   const [startDate, setStartDate] = useState(() => {
@@ -30,17 +32,54 @@ export default function PortfolioSummaryPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
-          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-        </Link>
-        <div className="p-3 bg-pink-500/10 rounded-lg">
-          <PieChart className="w-6 h-6 text-pink-600" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <div className="p-3 bg-pink-500/10 rounded-lg">
+            <PieChart className="w-6 h-6 text-pink-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Portfolio Summary</h1>
+            <p className="text-muted-foreground">View loan portfolio statistics and performance</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Portfolio Summary</h1>
-          <p className="text-muted-foreground">View loan portfolio statistics and performance</p>
-        </div>
+        <ExportDropdown
+          onExport={(format) => {
+            const p = portfolio;
+            const collectionRate = Number(p?.totalDisbursed) > 0
+              ? ((Number(p?.totalPaid) / Number(p?.totalDisbursed)) * 100).toFixed(1) + "%"
+              : "0%";
+            const parPercent = Number(p?.totalOutstanding) > 0
+              ? ((Number(p?.portfolioAtRisk) / Number(p?.totalOutstanding)) * 100).toFixed(1) + "%"
+              : "0%";
+            const exportOptions: ExportOptions = {
+              title: "Portfolio Summary",
+              subtitle: `${startDate} to ${endDate}`,
+              filename: "portfolio-summary",
+              columns: [
+                { header: "Metric", key: "metric", width: 28 },
+                { header: "Value", key: "value", width: 28 },
+              ],
+              data: [
+                { metric: "Total Loans", value: p?.totalLoans ?? 0 },
+                { metric: "Active Loans", value: p?.activeLoans ?? 0 },
+                { metric: "Total Disbursed", value: formatCurrency(p?.totalDisbursed ?? 0) },
+                { metric: "Total Outstanding", value: formatCurrency(p?.totalOutstanding ?? 0) },
+                { metric: "Total Paid", value: formatCurrency(p?.totalPaid ?? 0) },
+                { metric: "Average Loan Size", value: formatCurrency(p?.averageLoanSize ?? 0) },
+                { metric: "Delinquent Loans", value: p?.delinquentLoans ?? 0 },
+                { metric: "Portfolio at Risk", value: formatCurrency(p?.portfolioAtRisk ?? 0) },
+                { metric: "PAR %", value: parPercent },
+                { metric: "Collection Rate", value: collectionRate },
+              ],
+              orientation: "portrait",
+            };
+            handleExport(format, exportOptions, "print-report");
+          }}
+          disabled={!portfolio}
+        />
       </div>
 
       {/* Filters */}
@@ -100,7 +139,7 @@ export default function PortfolioSummaryPage() {
           <div className="text-destructive">Error: {error.message}</div>
         </div>
       ) : portfolio ? (
-        <>
+        <div id="print-report">
           {/* Key Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="bg-card border border-border rounded-lg p-6">
@@ -233,7 +272,7 @@ export default function PortfolioSummaryPage() {
                 : "Attention Required: Portfolio at risk exceeds 10% of outstanding loans."}
             </p>
           </div>
-        </>
+        </div>
       ) : (
         <div className="bg-card border border-border rounded-lg p-12 text-center">
           <PieChart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />

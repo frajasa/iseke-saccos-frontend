@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_LOAN_PROVISION_REPORT } from "@/lib/graphql/queries";
 import { formatCurrency } from "@/lib/utils";
-import { ArrowLeft, ShieldAlert, Calendar, Printer, Download } from "lucide-react";
+import { ArrowLeft, ShieldAlert, Calendar } from "lucide-react";
 import Link from "next/link";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 
 const classificationColors: Record<string, string> = {
   CURRENT: "bg-green-100 text-green-800",
@@ -41,16 +43,36 @@ export default function LoanProvisioningPage() {
             <p className="text-muted-foreground">Loan classification and provision analysis</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-            <Printer className="w-4 h-4" />
-            Print
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-            <Download className="w-4 h-4" />
-            Export
-          </button>
-        </div>
+        <ExportDropdown
+          onExport={(format) => {
+            const classifications = report?.classifications || [];
+            const exportOptions: ExportOptions = {
+              title: "Loan Provisioning Report",
+              subtitle: `As of ${date}`,
+              filename: "loan-provisioning",
+              columns: [
+                { header: "Classification", key: "classification", width: 16 },
+                { header: "Number of Loans", key: "count", width: 14, format: "number" },
+                { header: "Outstanding Amount", key: "outstandingAmount", width: 20, format: "currency" },
+                { header: "Provision Rate", key: "provisionRate", width: 14, format: "percent" },
+                { header: "Provision Amount", key: "provisionAmount", width: 20, format: "currency" },
+              ],
+              data: classifications.map((cls: any) => ({
+                classification: cls.classification,
+                count: cls.count,
+                outstandingAmount: cls.outstandingAmount,
+                provisionRate: Number(cls.provisionRate) * 100,
+                provisionAmount: cls.provisionAmount,
+              })),
+              summary: [
+                { label: "Total Outstanding", value: formatCurrency(report?.totalOutstanding || 0) },
+                { label: "Total Provision", value: formatCurrency(report?.totalProvision || 0) },
+              ],
+            };
+            handleExport(format, exportOptions, "print-report");
+          }}
+          disabled={!report?.classifications?.length}
+        />
       </div>
 
       {/* Date Selector */}
@@ -106,7 +128,7 @@ export default function LoanProvisioningPage() {
           </div>
 
           {/* Classification Table */}
-          <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div id="print-report" className="bg-card border border-border rounded-lg overflow-hidden">
             <div className="p-4 border-b border-border">
               <h3 className="text-lg font-semibold text-foreground">Loan Classifications</h3>
               <p className="text-sm text-muted-foreground">

@@ -15,6 +15,8 @@ import {
   Hash,
 } from "lucide-react";
 import Link from "next/link";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 
 export default function DailyTransactionsPage() {
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -65,17 +67,45 @@ export default function DailyTransactionsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
-          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-        </Link>
-        <div className="p-3 bg-violet-500/10 rounded-lg">
-          <BarChart3 className="w-6 h-6 text-violet-600" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <div className="p-3 bg-violet-500/10 rounded-lg">
+            <BarChart3 className="w-6 h-6 text-violet-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Daily Transaction Summary</h1>
+            <p className="text-muted-foreground">Overview of daily financial activity</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Daily Transaction Summary</h1>
-          <p className="text-muted-foreground">Overview of daily financial activity</p>
-        </div>
+        <ExportDropdown
+          onExport={(format) => {
+            const s = summary;
+            const nf = netFlow;
+            const exportOptions: ExportOptions = {
+              title: "Daily Transaction Summary",
+              subtitle: `Date: ${date}`,
+              filename: "daily-transactions",
+              columns: [
+                { header: "Metric", key: "metric", width: 28 },
+                { header: "Value", key: "value", width: 28 },
+              ],
+              data: [
+                { metric: "Total Deposits", value: formatCurrency(s?.deposits ?? 0) },
+                { metric: "Total Withdrawals", value: formatCurrency(s?.withdrawals ?? 0) },
+                { metric: "Loan Disbursements", value: formatCurrency(s?.loanDisbursements ?? 0) },
+                { metric: "Loan Repayments", value: formatCurrency(s?.loanRepayments ?? 0) },
+                { metric: "Transaction Count", value: s?.totalCount ?? 0 },
+                { metric: "Net Cash Flow", value: (nf >= 0 ? "+" : "-") + formatCurrency(Math.abs(nf)) },
+              ],
+              orientation: "portrait",
+            };
+            handleExport(format, exportOptions, "print-report");
+          }}
+          disabled={!summary}
+        />
       </div>
 
       {/* Date Selector */}
@@ -108,7 +138,7 @@ export default function DailyTransactionsPage() {
           <p>No transaction data available for the selected date.</p>
         </div>
       ) : (
-        <>
+        <div id="print-report">
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {cards.map((card) => (
@@ -144,7 +174,7 @@ export default function DailyTransactionsPage() {
               </p>
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

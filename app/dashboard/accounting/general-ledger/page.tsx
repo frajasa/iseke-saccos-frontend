@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_CHART_OF_ACCOUNTS, GET_GENERAL_LEDGER } from "@/lib/graphql/queries";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { ArrowLeft, FileText, Calendar, Search, Printer, Download } from "lucide-react";
+import { ArrowLeft, FileText, Calendar, Search } from "lucide-react";
 import Link from "next/link";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 
 export default function GeneralLedgerPage() {
   const [selectedAccountId, setSelectedAccountId] = useState("");
@@ -72,16 +74,40 @@ export default function GeneralLedgerPage() {
             <p className="text-muted-foreground">View detailed account transactions</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-            <Printer className="w-4 h-4" />
-            Print
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-            <Download className="w-4 h-4" />
-            Export
-          </button>
-        </div>
+        <ExportDropdown
+          onExport={(format) => {
+            const selectedAccount = accountsData?.chartOfAccounts?.find(
+              (a: { id: string }) => a.id === selectedAccountId
+            ) as { accountName?: string } | undefined;
+            const exportOptions: ExportOptions = {
+              title: "General Ledger",
+              subtitle: `${selectedAccount?.accountName || "All Accounts"} | ${startDate} to ${endDate}`,
+              filename: "general-ledger",
+              columns: [
+                { header: "Date", key: "postingDate", width: 14, format: "date" },
+                { header: "Description", key: "description", width: 30 },
+                { header: "Reference", key: "reference", width: 16 },
+                { header: "Debit", key: "debitAmount", width: 16, format: "currency" },
+                { header: "Credit", key: "creditAmount", width: 16, format: "currency" },
+                { header: "Balance", key: "balance", width: 16, format: "currency" },
+              ],
+              data: ledgerEntries.map((e: any) => ({
+                postingDate: e.postingDate,
+                description: e.description,
+                reference: e.reference || "",
+                debitAmount: e.debitAmount || 0,
+                creditAmount: e.creditAmount || 0,
+                balance: e.balance,
+              })),
+              summary: [
+                { label: "Total Debits", value: formatCurrency(totalDebits) },
+                { label: "Total Credits", value: formatCurrency(totalCredits) },
+              ],
+            };
+            handleExport(format, exportOptions, "print-report");
+          }}
+          disabled={!ledgerEntries.length}
+        />
       </div>
 
       {/* Filters */}
@@ -175,7 +201,7 @@ export default function GeneralLedgerPage() {
 
       {/* Ledger Table */}
       {selectedAccountId && (
-        <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div id="print-report" className="bg-card border border-border rounded-lg overflow-hidden">
           {loading ? (
             <div className="p-12 text-center text-muted-foreground">
               Loading ledger entries...

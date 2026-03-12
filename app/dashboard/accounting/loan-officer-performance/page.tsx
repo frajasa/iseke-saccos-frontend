@@ -6,6 +6,8 @@ import { GET_LOAN_OFFICER_PERFORMANCE } from "@/lib/graphql/queries";
 import { formatCurrency } from "@/lib/utils";
 import { ArrowLeft, Users, Calendar, TrendingUp, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 import ErrorDisplay from "@/components/ui/ErrorDisplay";
 import { isNullListError } from "@/lib/error-utils";
 
@@ -26,17 +28,48 @@ export default function LoanOfficerPerformancePage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
-          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-        </Link>
-        <div className="p-3 bg-indigo-500/10 rounded-lg">
-          <Users className="w-6 h-6 text-indigo-600" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <div className="p-3 bg-indigo-500/10 rounded-lg">
+            <Users className="w-6 h-6 text-indigo-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Loan Officer Performance</h1>
+            <p className="text-muted-foreground">Track loan officer KPIs and portfolio quality</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Loan Officer Performance</h1>
-          <p className="text-muted-foreground">Track loan officer KPIs and portfolio quality</p>
-        </div>
+        <ExportDropdown
+          onExport={(format) => {
+            const exportOptions: ExportOptions = {
+              title: "Loan Officer Performance",
+              subtitle: `Period: ${startDate} to ${endDate}`,
+              filename: "loan-officer-performance",
+              columns: [
+                { header: "Loan Officer", key: "loanOfficer", width: 22 },
+                { header: "Total Loans", key: "totalLoans", width: 12, format: "number" },
+                { header: "Active Loans", key: "activeLoans", width: 12, format: "number" },
+                { header: "Delinquent", key: "delinquentLoans", width: 12, format: "number" },
+                { header: "Total Disbursed", key: "totalDisbursed", width: 18, format: "currency" },
+                { header: "Outstanding", key: "totalOutstanding", width: 18, format: "currency" },
+                { header: "PAR %", key: "parPercentage", width: 10, format: "percent" },
+              ],
+              data: officers.map((o: any) => ({
+                loanOfficer: o.loanOfficer,
+                totalLoans: o.totalLoans,
+                activeLoans: o.activeLoans,
+                delinquentLoans: o.delinquentLoans,
+                totalDisbursed: o.totalDisbursed,
+                totalOutstanding: o.totalOutstanding,
+                parPercentage: Number(o.parPercentage),
+              })),
+            };
+            handleExport(format, exportOptions, "print-report");
+          }}
+          disabled={!officers.length}
+        />
       </div>
 
       {/* Filters */}
@@ -109,7 +142,7 @@ export default function LoanOfficerPerformancePage() {
           </div>
 
           {/* Table */}
-          <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div id="print-report" className="bg-card border border-border rounded-lg overflow-hidden">
             <table className="w-full">
               <thead className="bg-muted">
                 <tr>

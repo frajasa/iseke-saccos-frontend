@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_FINANCIAL_STATEMENTS, GET_BRANCHES } from "@/lib/graphql/queries";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { ArrowLeft, TrendingUp, Calendar, Building2, Printer, Download } from "lucide-react";
+import { ArrowLeft, TrendingUp, Calendar, Building2 } from "lucide-react";
 import Link from "next/link";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 
 export default function FinancialStatementsPage() {
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -41,16 +43,54 @@ export default function FinancialStatementsPage() {
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-            <Printer className="w-4 h-4" />
-            Print
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-            <Download className="w-4 h-4" />
-            Export
-          </button>
-        </div>
+        <ExportDropdown
+          onExport={(format) => {
+            const isBalanceSheet = activeTab === "balance-sheet";
+            const title = isBalanceSheet ? "Balance Sheet" : "Income Statement";
+            const filename = isBalanceSheet ? "balance-sheet" : "income-statement";
+            const details = isBalanceSheet ? balanceSheet?.details : incomeStatement?.details;
+            const rows: Record<string, any>[] = [];
+            details?.forEach((item: any) => {
+              item.accounts?.forEach((account: any) => {
+                rows.push({
+                  category: item.category,
+                  accountName: account.accountName,
+                  amount: account.amount,
+                });
+              });
+              rows.push({
+                category: `Total ${item.category}`,
+                accountName: "",
+                amount: item.amount,
+              });
+            });
+            const summary = isBalanceSheet
+              ? [
+                  { label: "Total Assets", value: formatCurrency(balanceSheet?.assets || 0) },
+                  { label: "Total Liabilities", value: formatCurrency(balanceSheet?.liabilities || 0) },
+                  { label: "Total Equity", value: formatCurrency(balanceSheet?.equity || 0) },
+                ]
+              : [
+                  { label: "Total Revenue", value: formatCurrency(incomeStatement?.revenue || 0) },
+                  { label: "Total Expenses", value: formatCurrency(incomeStatement?.expenses || 0) },
+                  { label: "Net Income", value: formatCurrency(incomeStatement?.netIncome || 0) },
+                ];
+            const exportOptions: ExportOptions = {
+              title,
+              subtitle: `As of ${selectedDate}`,
+              filename,
+              columns: [
+                { header: "Category", key: "category", width: 24 },
+                { header: "Account", key: "accountName", width: 30 },
+                { header: "Amount", key: "amount", width: 18, format: "currency" },
+              ],
+              data: rows,
+              summary,
+            };
+            handleExport(format, exportOptions, "print-report");
+          }}
+          disabled={!data?.financialStatements}
+        />
       </div>
 
       {/* Filters */}
@@ -124,7 +164,7 @@ export default function FinancialStatementsPage() {
           <div className="text-destructive">Error: {error.message}</div>
         </div>
       ) : (
-        <>
+        <div id="print-report">
           {/* Balance Sheet */}
           {activeTab === "balance-sheet" && balanceSheet && (
             <div className="space-y-6">
@@ -285,7 +325,7 @@ export default function FinancialStatementsPage() {
               </div>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

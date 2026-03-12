@@ -6,6 +6,8 @@ import { GET_DELINQUENCY_REPORT, GET_BRANCHES } from "@/lib/graphql/queries";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ArrowLeft, Calculator, Calendar, Building2, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 
 export default function DelinquencyReportPage() {
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -31,17 +33,47 @@ export default function DelinquencyReportPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
-          <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-        </Link>
-        <div className="p-3 bg-red-500/10 rounded-lg">
-          <Calculator className="w-6 h-6 text-red-600" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/accounting" className="p-2 hover:bg-secondary rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <div className="p-3 bg-red-500/10 rounded-lg">
+            <Calculator className="w-6 h-6 text-red-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Delinquency Report</h1>
+            <p className="text-muted-foreground">View loan aging and delinquency analysis</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Delinquency Report</h1>
-          <p className="text-muted-foreground">View loan aging and delinquency analysis</p>
-        </div>
+        <ExportDropdown
+          onExport={(format) => {
+            const ranges = report?.ranges || [];
+            const exportOptions: ExportOptions = {
+              title: "Delinquency Report",
+              subtitle: `As of ${formatDate(selectedDate)}`,
+              filename: "delinquency-report",
+              columns: [
+                { header: "Age Range", key: "range", width: 20 },
+                { header: "Number of Loans", key: "numberOfLoans", width: 18, format: "number" },
+                { header: "Outstanding Amount", key: "outstandingAmount", width: 22, format: "currency" },
+                { header: "Percentage", key: "percentage", width: 14, format: "percent" },
+              ],
+              data: ranges.map((r: any) => ({
+                range: r.range,
+                numberOfLoans: r.numberOfLoans,
+                outstandingAmount: r.outstandingAmount,
+                percentage: r.percentage,
+              })),
+              summary: [
+                { label: "Total Outstanding", value: formatCurrency(report?.totalOutstanding ?? 0) },
+                { label: "Total At Risk", value: formatCurrency(report?.totalAtRisk ?? 0) },
+              ],
+            };
+            handleExport(format, exportOptions, "print-report");
+          }}
+          disabled={!report?.ranges?.length}
+        />
       </div>
 
       {/* Filters */}
@@ -89,7 +121,7 @@ export default function DelinquencyReportPage() {
           <div className="text-destructive">Error: {error.message}</div>
         </div>
       ) : report ? (
-        <>
+        <div id="print-report">
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-card border border-border rounded-lg p-6">
@@ -250,7 +282,7 @@ export default function DelinquencyReportPage() {
               </ul>
             </div>
           )}
-        </>
+        </div>
       ) : (
         <div className="bg-card border border-border rounded-lg p-12 text-center">
           <Calculator className="w-16 h-16 text-muted-foreground mx-auto mb-4" />

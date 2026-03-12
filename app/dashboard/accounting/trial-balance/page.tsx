@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_TRIAL_BALANCE } from "@/lib/graphql/queries";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { ArrowLeft, Scale, Calendar, Printer, Download, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, Scale, Calendar, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 
 export default function TrialBalancePage() {
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -50,14 +52,39 @@ export default function TrialBalancePage() {
           >
             Refresh
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-            <Printer className="w-4 h-4" />
-            Print
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-            <Download className="w-4 h-4" />
-            Export
-          </button>
+          <ExportDropdown
+            onExport={(format) => {
+              const entries = data?.trialBalance?.entries || [];
+              const exportOptions: ExportOptions = {
+                title: "Trial Balance",
+                subtitle: `As of ${selectedDate}`,
+                filename: "trial-balance",
+                columns: [
+                  { header: "Account Code", key: "accountCode", width: 14 },
+                  { header: "Account Name", key: "accountName", width: 28 },
+                  { header: "Type", key: "accountType", width: 12 },
+                  { header: "Category", key: "category", width: 18 },
+                  { header: "Debit Balance", key: "debitBalance", width: 16, format: "currency" },
+                  { header: "Credit Balance", key: "creditBalance", width: 16, format: "currency" },
+                ],
+                data: entries.map((e: any) => ({
+                  accountCode: e.account.accountCode,
+                  accountName: e.account.accountName,
+                  accountType: e.account.accountType,
+                  category: e.account.accountCategory?.replace(/_/g, " ") || "",
+                  debitBalance: e.debitBalance || 0,
+                  creditBalance: e.creditBalance || 0,
+                })),
+                summary: [
+                  { label: "Total Debits", value: formatCurrency(data?.trialBalance?.totalDebits || 0) },
+                  { label: "Total Credits", value: formatCurrency(data?.trialBalance?.totalCredits || 0) },
+                  { label: "Difference", value: formatCurrency(Math.abs(Number(data?.trialBalance?.totalDebits || 0) - Number(data?.trialBalance?.totalCredits || 0))) },
+                ],
+              };
+              handleExport(format, exportOptions, "print-report");
+            }}
+            disabled={!data?.trialBalance?.entries?.length}
+          />
         </div>
       </div>
 
@@ -148,7 +175,7 @@ export default function TrialBalancePage() {
           <div className="text-destructive">Error loading trial balance: {error.message}</div>
         </div>
       ) : (
-        <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div id="print-report" className="bg-card border border-border rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-muted/30">

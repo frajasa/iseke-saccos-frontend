@@ -7,6 +7,8 @@ import { formatCurrency } from "@/lib/utils";
 import { ArrowLeft, BookOpen, ChevronRight, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 
 export default function ChartOfAccountsPage() {
   const { data, loading, error } = useQuery(GET_CHART_OF_ACCOUNTS, {
@@ -180,10 +182,40 @@ export default function ChartOfAccountsPage() {
             </p>
           </div>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
-          <Plus className="w-5 h-5" />
-          Add Account
-        </button>
+        <div className="flex gap-2">
+          <ExportDropdown
+            onExport={(format) => {
+              const accounts = data?.chartOfAccounts || [];
+              const exportOptions: ExportOptions = {
+                title: "Chart of Accounts",
+                subtitle: `Generated on ${new Date().toLocaleDateString("en-GB")}`,
+                filename: "chart-of-accounts",
+                columns: [
+                  { header: "Account Code", key: "accountCode", width: 14 },
+                  { header: "Account Name", key: "accountName", width: 30 },
+                  { header: "Type", key: "accountType", width: 12 },
+                  { header: "Category", key: "category", width: 18 },
+                  { header: "Balance", key: "balance", width: 18, format: "currency" },
+                  { header: "Status", key: "status", width: 10 },
+                ],
+                data: accounts.map((a: any) => ({
+                  accountCode: a.accountCode,
+                  accountName: a.accountName,
+                  accountType: a.accountType,
+                  category: a.accountCategory?.replace(/_/g, " ") || "",
+                  balance: a.balance || 0,
+                  status: a.status,
+                })),
+              };
+              handleExport(format, exportOptions, "print-report");
+            }}
+            disabled={!data?.chartOfAccounts?.length}
+          />
+          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors">
+            <Plus className="w-5 h-5" />
+            Add Account
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -211,7 +243,7 @@ export default function ChartOfAccountsPage() {
       </div>
 
       {/* Accounts List */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
+      <div id="print-report" className="bg-card border border-border rounded-lg overflow-hidden">
         {/* Table Header */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-muted/50 border-b border-border font-semibold text-sm text-muted-foreground">
           <div className="md:col-span-1">Code</div>

@@ -4,8 +4,10 @@ import { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { GET_CASH_FLOW_STATEMENT } from "@/lib/graphql/queries";
 import { formatCurrency } from "@/lib/utils";
-import { ArrowLeft, TrendingUp, Calendar, Printer, Download } from "lucide-react";
+import { ArrowLeft, TrendingUp, Calendar } from "lucide-react";
 import Link from "next/link";
+import ExportDropdown from "@/components/ExportDropdown";
+import { ExportOptions, handleExport } from "@/lib/export-utils";
 
 export default function CashFlowPage() {
   const [startDate, setStartDate] = useState(() => {
@@ -67,16 +69,38 @@ export default function CashFlowPage() {
             <p className="text-muted-foreground">Operating, investing, and financing activities</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-            <Printer className="w-4 h-4" />
-            Print
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-secondary transition-colors">
-            <Download className="w-4 h-4" />
-            Export
-          </button>
-        </div>
+        <ExportDropdown
+          onExport={(format) => {
+            const cf = data?.cashFlowStatement;
+            const rows: Record<string, any>[] = [];
+            const flattenSection = (section: any) => {
+              if (!section) return;
+              rows.push({ item: `--- ${section.name} ---`, amount: "" });
+              section.items?.forEach((i: any) => {
+                rows.push({ item: i.description, amount: i.amount });
+              });
+              rows.push({ item: `Net ${section.name}`, amount: section.total });
+            };
+            flattenSection(cf?.operatingActivities);
+            flattenSection(cf?.investingActivities);
+            flattenSection(cf?.financingActivities);
+            const exportOptions: ExportOptions = {
+              title: "Cash Flow Statement",
+              subtitle: `Period: ${startDate} to ${endDate}`,
+              filename: "cash-flow-statement",
+              columns: [
+                { header: "Item", key: "item", width: 40 },
+                { header: "Amount", key: "amount", width: 20, format: "currency" },
+              ],
+              data: rows,
+              summary: [
+                { label: "Net Cash Flow", value: formatCurrency(Math.abs(cf?.netCashFlow || 0)) + (cf?.netCashFlow < 0 ? " (-)" : "") },
+              ],
+            };
+            handleExport(format, exportOptions, "print-report");
+          }}
+          disabled={!data?.cashFlowStatement}
+        />
       </div>
 
       {/* Date Filters */}
@@ -110,7 +134,7 @@ export default function CashFlowPage() {
       </div>
 
       {/* Cash Flow Report */}
-      <div className="bg-card border border-border rounded-lg p-6">
+      <div id="print-report" className="bg-card border border-border rounded-lg p-6">
         {loading ? (
           <div className="p-12 text-center text-muted-foreground">Loading cash flow statement...</div>
         ) : error ? (
