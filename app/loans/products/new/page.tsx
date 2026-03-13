@@ -243,6 +243,9 @@ export default function NewLoanProductPage() {
                   <option value={InterestMethod.FLAT}>Flat Rate</option>
                   <option value={InterestMethod.DECLINING_BALANCE}>Declining Balance</option>
                   <option value={InterestMethod.REDUCING_BALANCE}>Reducing Balance</option>
+                  <option value={InterestMethod.DISCOUNTED}>Discounted</option>
+                  <option value={InterestMethod.STEPPED}>Stepped</option>
+                  <option value={InterestMethod.CAPITALIZED}>Capitalized</option>
                 </select>
               </div>
 
@@ -507,6 +510,68 @@ export default function NewLoanProductPage() {
               <p className="mt-1 text-xs text-muted-foreground">
                 Days after due date before late payment penalties apply
               </p>
+            </div>
+          </div>
+
+          {/* Enhanced Lending Settings */}
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Enhanced Lending Settings</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Schedule Type</label>
+                <select name="scheduleType" value={formData.scheduleType || "STANDARD"} onChange={handleChange}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+                  <option value="STANDARD">Standard</option>
+                  <option value="BALLOON">Balloon</option>
+                  <option value="FREE_FORM">Free Form</option>
+                </select>
+              </div>
+              {formData.scheduleType === "BALLOON" && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Balloon Payment %</label>
+                  <input type="number" name="balloonPaymentPercentage" value={formData.balloonPaymentPercentage || ""} onChange={handleChange} step="1"
+                    className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="e.g., 50" />
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">Max Deferment Months</label>
+                <input type="number" name="maxDefermentMonths" value={formData.maxDefermentMonths || ""} onChange={handleChange}
+                  className="w-full px-3 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="capitalizeInterest" checked={formData.capitalizeInterest || false} onChange={handleChange} className="rounded border-border" />
+                Capitalize Interest
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="hasSteppedRates" checked={formData.hasSteppedRates || false} onChange={handleChange} className="rounded border-border" />
+                Stepped Rates
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="allowsVariableRate" checked={formData.allowsVariableRate || false} onChange={handleChange} className="rounded border-border" />
+                Variable Rate
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="allowsDeferment" checked={formData.allowsDeferment || false} onChange={handleChange} className="rounded border-border" />
+                Allow Deferment
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="allowsPenaltySuspension" checked={formData.allowsPenaltySuspension || false} onChange={handleChange} className="rounded border-border" />
+                Allow Penalty Suspension
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="allowsAdvanceRecalculation" checked={formData.allowsAdvanceRecalculation !== false} onChange={handleChange} className="rounded border-border" />
+                Advance Recalculation
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="supportsGroupLending" checked={formData.supportsGroupLending || false} onChange={handleChange} className="rounded border-border" />
+                Group Lending
+              </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" name="allowsFreeSchedule" checked={formData.allowsFreeSchedule || false} onChange={handleChange} className="rounded border-border" />
+                Free Schedule
+              </label>
             </div>
           </div>
         </div>

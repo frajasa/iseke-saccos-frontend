@@ -124,12 +124,81 @@ export enum SavingsProductType {
   SHARES = "SHARES",
   CHECKING = "CHECKING",
   CURRENT = "CURRENT",
+  TERM_DEPOSIT = "TERM_DEPOSIT",
+  COMPULSORY_DEPOSIT = "COMPULSORY_DEPOSIT",
+  DEMAND_DEPOSIT = "DEMAND_DEPOSIT",
+  OVERDRAFT = "OVERDRAFT",
+  PASSBOOK = "PASSBOOK",
+}
+
+export enum InterestCalculationMethod {
+  DAILY_BALANCE = "DAILY_BALANCE",
+  MINIMUM_DAILY_BALANCE = "MINIMUM_DAILY_BALANCE",
+  MINIMUM_MONTHLY_BALANCE = "MINIMUM_MONTHLY_BALANCE",
+  MINIMUM_QUARTERLY_BALANCE = "MINIMUM_QUARTERLY_BALANCE",
+  AVERAGE_DAILY_BALANCE = "AVERAGE_DAILY_BALANCE",
+  AVERAGE_MONTHLY_BALANCE = "AVERAGE_MONTHLY_BALANCE",
+  THIRTY_360 = "THIRTY_360",
+  FIFTY_TWO_WEEKS = "FIFTY_TWO_WEEKS",
+}
+
+export enum InterestPaymentFrequency {
+  DAILY = "DAILY",
+  WEEKLY = "WEEKLY",
+  BI_WEEKLY = "BI_WEEKLY",
+  EVERY_FOUR_WEEKS = "EVERY_FOUR_WEEKS",
+  SEMI_MONTHLY = "SEMI_MONTHLY",
+  MONTHLY = "MONTHLY",
+  QUARTERLY = "QUARTERLY",
+  SEMI_ANNUAL = "SEMI_ANNUAL",
+  ANNUAL = "ANNUAL",
+  AT_MATURITY = "AT_MATURITY",
+}
+
+export enum AccountSubType {
+  PASSBOOK = "PASSBOOK",
+  NON_PASSBOOK = "NON_PASSBOOK",
+}
+
+export enum CheckStatus {
+  ISSUED = "ISSUED",
+  CLEARED = "CLEARED",
+  STOPPED = "STOPPED",
+  VOIDED = "VOIDED",
+  RETURNED = "RETURNED",
+}
+
+export enum GroupAccountType {
+  ON_BOOK = "ON_BOOK",
+  OFF_BOOK = "OFF_BOOK",
+}
+
+export enum TermDepositMaturityAction {
+  AUTO_ROLLOVER_PRINCIPAL = "AUTO_ROLLOVER_PRINCIPAL",
+  AUTO_ROLLOVER_PRINCIPAL_AND_INTEREST = "AUTO_ROLLOVER_PRINCIPAL_AND_INTEREST",
+  TRANSFER_TO_SAVINGS = "TRANSFER_TO_SAVINGS",
+  CLOSE = "CLOSE",
 }
 
 export enum InterestMethod {
   FLAT = "FLAT",
   DECLINING_BALANCE = "DECLINING_BALANCE",
   REDUCING_BALANCE = "REDUCING_BALANCE",
+  DISCOUNTED = "DISCOUNTED",
+  STEPPED = "STEPPED",
+  CAPITALIZED = "CAPITALIZED",
+}
+
+export enum LoanScheduleType {
+  STANDARD = "STANDARD",
+  BALLOON = "BALLOON",
+  FREE_FORM = "FREE_FORM",
+}
+
+export enum GroupLoanType {
+  INDIVIDUAL = "INDIVIDUAL",
+  GROUP_SHARED = "GROUP_SHARED",
+  SOLIDARITY = "SOLIDARITY",
 }
 
 export enum BranchStatus {
@@ -148,6 +217,7 @@ export enum ScheduleStatus {
   PAID = "PAID",
   OVERDUE = "OVERDUE",
   CANCELLED = "CANCELLED",
+  DEFERRED = "DEFERRED",
 }
 
 export enum GuarantorStatus {
@@ -316,6 +386,7 @@ export interface Member {
   signaturePath?: string;
   fingerprintPath?: string;
   shares?: number;
+  taxExempt?: boolean;
   branch: Branch;
   savingsAccounts?: SavingsAccount[];
   loanAccounts?: LoanAccount[];
@@ -347,6 +418,29 @@ export interface SavingsProduct {
   taxWithholdingRate?: number;
   dormancyPeriodDays: number;
   allowsOverdraft: boolean;
+  withdrawalAmountLimit?: number;
+  withdrawalAmountLimitMonthly?: number;
+  excessWithdrawalFee?: number;
+  prematureWithdrawalPenaltyRate?: number;
+  prematureWithdrawalInterestReduction?: number;
+  maturityAction?: TermDepositMaturityAction;
+  postMaturityInterestRate?: number;
+  termDays?: number;
+  autoRenewAtCurrentRate?: boolean;
+  interestRateGroup?: string;
+  baseRateSpread?: number;
+  useBaseRate?: boolean;
+  hasSteppedRates?: boolean;
+  taxExemptProduct?: boolean;
+  overdraftLimit?: number;
+  overdraftFeeFlat?: number;
+  overdraftInterestRate?: number;
+  accountSubType?: AccountSubType;
+  groupInsuranceFeeRate?: number;
+  groupInsuranceFeeFlat?: number;
+  interestCalcMethod?: InterestCalculationMethod;
+  interestPayFrequency?: InterestPaymentFrequency;
+  userDefinedPaymentDays?: number;
   status: ProductStatus;
   createdAt: string;
   updatedAt: string;
@@ -368,6 +462,18 @@ export interface SavingsAccount {
   maturityDate?: string;
   beneficiaryName?: string;
   beneficiaryRelationship?: string;
+  overdraftLimit?: number;
+  overdraftBalance?: number;
+  termDepositAmount?: number;
+  maturityAmount?: number;
+  termDays?: number;
+  maturityAction?: TermDepositMaturityAction;
+  matured?: boolean;
+  rolloverDate?: string;
+  rolloverCount?: number;
+  accountSubType?: AccountSubType;
+  effectiveInterestRate?: number;
+  interestRateEffectiveDate?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -395,6 +501,19 @@ export interface LoanProduct {
   collateralPercentage?: number;
   shareMultiplier?: number;
   requiredDocuments?: string;
+  scheduleType?: LoanScheduleType;
+  balloonPaymentPercentage?: number;
+  allowsFreeSchedule?: boolean;
+  capitalizeInterest?: boolean;
+  hasSteppedRates?: boolean;
+  allowsVariableRate?: boolean;
+  interestRateGroup?: string;
+  baseRateSpread?: number;
+  allowsDeferment?: boolean;
+  maxDefermentMonths?: number;
+  allowsPenaltySuspension?: boolean;
+  allowsAdvanceRecalculation?: boolean;
+  supportsGroupLending?: boolean;
   status: ProductStatus;
   createdAt: string;
   updatedAt: string;
@@ -454,10 +573,95 @@ export interface LoanAccount {
   writeOffReason?: string;
   writeOffDate?: string;
   writtenOffBy?: string;
+  effectiveInterestRate?: number;
+  rateEffectiveDate?: string;
+  penaltySuspended?: boolean;
+  penaltySuspendedUntil?: string;
+  defermentEndDate?: string;
+  deferredInstallments?: number;
+  firstPaymentDate?: string;
+  paymentDayOfMonth?: number;
+  scheduleType?: LoanScheduleType;
+  groupLoanType?: GroupLoanType;
+  loanGroup?: LoanGroup;
   guarantors?: Guarantor[];
   collateral?: Collateral[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface LoanGroup {
+  id: string;
+  groupNumber: string;
+  groupName: string;
+  description?: string;
+  groupLoanType: GroupLoanType;
+  branch?: Branch;
+  maxGroupLoanAmount?: number;
+  jointLiability: boolean;
+  formationDate: string;
+  isActive: boolean;
+  members?: LoanGroupMember[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface LoanGroupMember {
+  id: string;
+  loanGroup: LoanGroup;
+  member: Member;
+  liabilityShare?: number;
+  roleInGroup?: string;
+  joinDate: string;
+  isActive: boolean;
+}
+
+export interface LoanFeeConfig {
+  id: string;
+  feeName: string;
+  feeType: string;
+  product?: LoanProduct;
+  member?: Member;
+  rate?: number;
+  fixedAmount?: number;
+  minAmount?: number;
+  maxAmount?: number;
+  isRefundable: boolean;
+  chargeOn: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface LoanDeferment {
+  id: string;
+  loanAccount: LoanAccount;
+  defermentType: string;
+  startDate: string;
+  endDate: string;
+  installmentsDeferred?: number;
+  reason?: string;
+  approvedBy?: string;
+  createdAt?: string;
+}
+
+export interface LoanInterestRateTier {
+  id: string;
+  product: LoanProduct;
+  fromAmount: number;
+  toAmount: number;
+  interestRate: number;
+  sortOrder: number;
+}
+
+export interface SchedulePreviewRow {
+  installmentNumber: number;
+  dueDate: string;
+  principalDue: number;
+  interestDue: number;
+  totalDue: number;
+  remainingBalance: number;
+  isBalloon?: boolean;
 }
 
 export interface LoanAccountPage {
@@ -655,6 +859,29 @@ export interface CreateSavingsProductInput {
   taxWithholdingRate?: number;
   dormancyPeriodDays: number;
   allowsOverdraft: boolean;
+  withdrawalAmountLimit?: number;
+  withdrawalAmountLimitMonthly?: number;
+  excessWithdrawalFee?: number;
+  prematureWithdrawalPenaltyRate?: number;
+  prematureWithdrawalInterestReduction?: number;
+  maturityAction?: string;
+  postMaturityInterestRate?: number;
+  termDays?: number;
+  autoRenewAtCurrentRate?: boolean;
+  interestRateGroup?: string;
+  baseRateSpread?: number;
+  useBaseRate?: boolean;
+  hasSteppedRates?: boolean;
+  taxExemptProduct?: boolean;
+  overdraftLimit?: number;
+  overdraftFeeFlat?: number;
+  overdraftInterestRate?: number;
+  accountSubType?: string;
+  groupInsuranceFeeRate?: number;
+  groupInsuranceFeeFlat?: number;
+  interestCalcMethod?: string;
+  interestPayFrequency?: string;
+  userDefinedPaymentDays?: number;
 }
 
 export interface UpdateSavingsProductInput {
@@ -674,6 +901,29 @@ export interface UpdateSavingsProductInput {
   taxWithholdingRate?: number;
   dormancyPeriodDays?: number;
   allowsOverdraft?: boolean;
+  withdrawalAmountLimit?: number;
+  withdrawalAmountLimitMonthly?: number;
+  excessWithdrawalFee?: number;
+  prematureWithdrawalPenaltyRate?: number;
+  prematureWithdrawalInterestReduction?: number;
+  maturityAction?: string;
+  postMaturityInterestRate?: number;
+  termDays?: number;
+  autoRenewAtCurrentRate?: boolean;
+  interestRateGroup?: string;
+  baseRateSpread?: number;
+  useBaseRate?: boolean;
+  hasSteppedRates?: boolean;
+  taxExemptProduct?: boolean;
+  overdraftLimit?: number;
+  overdraftFeeFlat?: number;
+  overdraftInterestRate?: number;
+  accountSubType?: string;
+  groupInsuranceFeeRate?: number;
+  groupInsuranceFeeFlat?: number;
+  interestCalcMethod?: string;
+  interestPayFrequency?: string;
+  userDefinedPaymentDays?: number;
   status?: ProductStatus;
 }
 
@@ -697,6 +947,19 @@ export interface CreateLoanProductInput {
   minimumGuarantors: number;
   requiresCollateral: boolean;
   collateralPercentage?: number;
+  scheduleType?: string;
+  balloonPaymentPercentage?: number;
+  allowsFreeSchedule?: boolean;
+  capitalizeInterest?: boolean;
+  hasSteppedRates?: boolean;
+  allowsVariableRate?: boolean;
+  interestRateGroup?: string;
+  baseRateSpread?: number;
+  allowsDeferment?: boolean;
+  maxDefermentMonths?: number;
+  allowsPenaltySuspension?: boolean;
+  allowsAdvanceRecalculation?: boolean;
+  supportsGroupLending?: boolean;
 }
 
 export interface UpdateLoanProductInput {
@@ -720,6 +983,19 @@ export interface UpdateLoanProductInput {
   requiresCollateral?: boolean;
   collateralPercentage?: number;
   status?: ProductStatus;
+  scheduleType?: string;
+  balloonPaymentPercentage?: number;
+  allowsFreeSchedule?: boolean;
+  capitalizeInterest?: boolean;
+  hasSteppedRates?: boolean;
+  allowsVariableRate?: boolean;
+  interestRateGroup?: string;
+  baseRateSpread?: number;
+  allowsDeferment?: boolean;
+  maxDefermentMonths?: number;
+  allowsPenaltySuspension?: boolean;
+  allowsAdvanceRecalculation?: boolean;
+  supportsGroupLending?: boolean;
 }
 
 // Accounting Types
@@ -1148,6 +1424,9 @@ export interface DividendRun {
   rate?: number;
   totalAmount?: number;
   membersPaid?: number;
+  distributionMethod?: string;
+  profitFigure?: number;
+  totalInterestPoints?: number;
   status: string;
   processedBy?: string;
   processedAt?: string;
@@ -1342,5 +1621,187 @@ export interface BatchImportItem {
   status: string;
   errorMessage?: string;
   transactionId?: string;
+  createdAt?: string;
+}
+
+// ===== Savings Enhancement Types =====
+
+export interface InterestRateTier {
+  id: string;
+  savingsProduct: SavingsProduct;
+  fromAmount: number;
+  toAmount: number;
+  interestRate: number;
+  bonusRate?: number;
+  minimumDaysAtBalance?: number;
+  sortOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface InterestRateGroup {
+  id: string;
+  groupName: string;
+  description?: string;
+  baseRate: number;
+  effectiveDate: string;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface InterestRateChangeLog {
+  id: string;
+  savingsProduct?: SavingsProduct;
+  interestRateGroup?: InterestRateGroup;
+  oldRate: number;
+  newRate: number;
+  effectiveDate: string;
+  retroactiveFromDate?: string;
+  retroactiveCorrectionAmount?: number;
+  accountsAffected?: number;
+  processedAt?: string;
+  processedBy?: string;
+  createdAt?: string;
+}
+
+export interface GroupSavingsAccount {
+  id: string;
+  accountNumber: string;
+  groupName: string;
+  description?: string;
+  product: SavingsProduct;
+  branch?: Branch;
+  accountType: GroupAccountType;
+  balance: number;
+  accruedInterest: number;
+  insuranceFeeBalance: number;
+  status: AccountStatus;
+  openingDate: string;
+  members: GroupSavingsAccountMember[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface GroupSavingsAccountMember {
+  id: string;
+  groupSavingsAccount: GroupSavingsAccount;
+  member: Member;
+  joinDate: string;
+  sharePercentage?: number;
+  isActive: boolean;
+  createdAt?: string;
+}
+
+export interface CheckRegister {
+  id: string;
+  savingsAccount: SavingsAccount;
+  checkNumber: string;
+  issuedDate: string;
+  amount?: number;
+  payee?: string;
+  status: CheckStatus;
+  clearedDate?: string;
+  stopDate?: string;
+  stopReason?: string;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface DividendAllocation {
+  id: string;
+  dividendRun: DividendRun;
+  member: Member;
+  savingsAccount?: SavingsAccount;
+  interestPoints?: number;
+  allocationAmount: number;
+  taxAmount: number;
+  netAmount: number;
+  posted: boolean;
+  createdAt?: string;
+}
+
+// Cashier/Teller Sessions
+export enum CashierSessionStatus {
+  OPEN = "OPEN",
+  CLOSED = "CLOSED",
+  RECONCILED = "RECONCILED",
+}
+
+export interface CashierSession {
+  id: string;
+  user: { id: string; username: string; fullName?: string };
+  branch: { id: string; branchName: string };
+  openingBalance: number;
+  closingBalance?: number;
+  cashInTotal: number;
+  cashOutTotal: number;
+  expectedBalance?: number;
+  actualBalance?: number;
+  discrepancy?: number;
+  status: CashierSessionStatus;
+  openedAt: string;
+  closedAt?: string;
+  reconciledAt?: string;
+  reconciledBy?: string;
+  notes?: string;
+  createdAt?: string;
+}
+
+export interface CashierSessionPage {
+  content: CashierSession[];
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface CashDrawerTransaction {
+  id: string;
+  session: { id: string };
+  transaction?: { id: string; transactionNumber: string };
+  cashDirection: string;
+  amount: number;
+  runningBalance: number;
+  currencyCode?: string;
+  description?: string;
+  createdAt?: string;
+}
+
+// FX Positions
+export interface FxPosition {
+  id: string;
+  currencyCode: string;
+  positionAmount: number;
+  averageRate?: number;
+  unrealizedPnL?: number;
+  lastUpdated?: string;
+  branch?: { id: string; branchName: string };
+}
+
+export interface FxPositionHistory {
+  id: string;
+  currencyCode: string;
+  positionBefore?: number;
+  positionAfter?: number;
+  changeAmount?: number;
+  exchangeRate?: number;
+  transaction?: { id: string; transactionNumber: string };
+  branch?: { id: string; branchName: string };
+  createdAt?: string;
+}
+
+// Branch Settlements
+export interface BranchSettlement {
+  id: string;
+  fromBranch: { id: string; branchName: string };
+  toBranch: { id: string; branchName: string };
+  settlementDate: string;
+  totalAmount: number;
+  transactionCount: number;
+  status: string;
+  settledAt?: string;
+  settledBy?: string;
+  referenceNumber?: string;
+  notes?: string;
   createdAt?: string;
 }

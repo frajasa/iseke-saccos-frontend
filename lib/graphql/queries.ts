@@ -234,6 +234,29 @@ export const GET_SAVINGS_PRODUCT = gql`
       taxWithholdingRate
       dormancyPeriodDays
       allowsOverdraft
+      withdrawalAmountLimit
+      withdrawalAmountLimitMonthly
+      excessWithdrawalFee
+      prematureWithdrawalPenaltyRate
+      prematureWithdrawalInterestReduction
+      maturityAction
+      postMaturityInterestRate
+      termDays
+      autoRenewAtCurrentRate
+      interestRateGroup
+      baseRateSpread
+      useBaseRate
+      hasSteppedRates
+      taxExemptProduct
+      overdraftLimit
+      overdraftFeeFlat
+      overdraftInterestRate
+      accountSubType
+      groupInsuranceFeeRate
+      groupInsuranceFeeFlat
+      interestCalcMethod
+      interestPayFrequency
+      userDefinedPaymentDays
       status
       createdAt
       updatedAt
@@ -261,6 +284,12 @@ export const GET_SAVINGS_PRODUCTS = gql`
       taxWithholdingRate
       dormancyPeriodDays
       allowsOverdraft
+      interestCalcMethod
+      interestPayFrequency
+      accountSubType
+      hasSteppedRates
+      useBaseRate
+      taxExemptProduct
       status
       createdAt
       updatedAt
@@ -275,22 +304,8 @@ export const CREATE_SAVINGS_PRODUCT = gql`
       productCode
       productName
       productType
-      description
-      interestRate
-      interestCalculationMethod
-      interestPaymentFrequency
-      minimumBalance
-      maximumBalance
-      minimumOpeningBalance
-      withdrawalLimit
-      withdrawalFee
-      monthlyFee
-      taxWithholdingRate
-      dormancyPeriodDays
-      allowsOverdraft
       status
       createdAt
-      updatedAt
     }
   }
 `;
@@ -302,21 +317,7 @@ export const UPDATE_SAVINGS_PRODUCT = gql`
       productCode
       productName
       productType
-      description
-      interestRate
-      interestCalculationMethod
-      interestPaymentFrequency
-      minimumBalance
-      maximumBalance
-      minimumOpeningBalance
-      withdrawalLimit
-      withdrawalFee
-      monthlyFee
-      taxWithholdingRate
-      dormancyPeriodDays
-      allowsOverdraft
       status
-      createdAt
       updatedAt
     }
   }
@@ -460,6 +461,17 @@ export const GET_LOAN_PRODUCTS = gql`
       maximumTermMonths
       processingFeeRate
       insuranceFeeRate
+      scheduleType
+      balloonPaymentPercentage
+      allowsFreeSchedule
+      capitalizeInterest
+      hasSteppedRates
+      allowsVariableRate
+      allowsDeferment
+      maxDefermentMonths
+      allowsPenaltySuspension
+      allowsAdvanceRecalculation
+      supportsGroupLending
       status
     }
   }
@@ -547,6 +559,11 @@ export const GET_LOAN_ACCOUNT = gql`
         productName
         interestRate
         interestMethod
+        allowsDeferment
+        allowsPenaltySuspension
+        allowsVariableRate
+        allowsAdvanceRecalculation
+        scheduleType
       }
       branch {
         id
@@ -570,6 +587,16 @@ export const GET_LOAN_ACCOUNT = gql`
       loanOfficer
       purpose
       daysInArrears
+      effectiveInterestRate
+      rateEffectiveDate
+      penaltySuspended
+      penaltySuspendedUntil
+      defermentEndDate
+      deferredInstallments
+      firstPaymentDate
+      paymentDayOfMonth
+      scheduleType
+      groupLoanType
       guarantors {
         id
         guarantorName
@@ -2440,5 +2467,808 @@ export const ASSIGN_PERMISSIONS = gql`
         module
       }
     }
+  }
+`;
+
+// ===== Savings Enhancement Queries =====
+
+export const GET_INTEREST_RATE_TIERS = gql`
+  query GetInterestRateTiers($productId: ID!) {
+    interestRateTiers(productId: $productId) {
+      id
+      fromAmount
+      toAmount
+      interestRate
+      bonusRate
+      minimumDaysAtBalance
+      sortOrder
+      createdAt
+    }
+  }
+`;
+
+export const CREATE_INTEREST_RATE_TIER = gql`
+  mutation CreateInterestRateTier($productId: ID!, $fromAmount: Decimal!, $toAmount: Decimal!, $interestRate: Decimal!, $bonusRate: Decimal, $minimumDaysAtBalance: Int, $sortOrder: Int) {
+    createInterestRateTier(productId: $productId, fromAmount: $fromAmount, toAmount: $toAmount, interestRate: $interestRate, bonusRate: $bonusRate, minimumDaysAtBalance: $minimumDaysAtBalance, sortOrder: $sortOrder) {
+      id
+      fromAmount
+      toAmount
+      interestRate
+      bonusRate
+      minimumDaysAtBalance
+      sortOrder
+    }
+  }
+`;
+
+export const UPDATE_INTEREST_RATE_TIER = gql`
+  mutation UpdateInterestRateTier($id: ID!, $fromAmount: Decimal, $toAmount: Decimal, $interestRate: Decimal, $bonusRate: Decimal, $minimumDaysAtBalance: Int, $sortOrder: Int) {
+    updateInterestRateTier(id: $id, fromAmount: $fromAmount, toAmount: $toAmount, interestRate: $interestRate, bonusRate: $bonusRate, minimumDaysAtBalance: $minimumDaysAtBalance, sortOrder: $sortOrder) {
+      id
+      fromAmount
+      toAmount
+      interestRate
+      bonusRate
+      minimumDaysAtBalance
+      sortOrder
+    }
+  }
+`;
+
+export const DELETE_INTEREST_RATE_TIER = gql`
+  mutation DeleteInterestRateTier($id: ID!) {
+    deleteInterestRateTier(id: $id)
+  }
+`;
+
+export const GET_INTEREST_RATE_GROUPS = gql`
+  query GetInterestRateGroups {
+    interestRateGroups {
+      id
+      groupName
+      description
+      baseRate
+      effectiveDate
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_INTEREST_RATE_GROUP = gql`
+  query GetInterestRateGroup($id: ID!) {
+    interestRateGroup(id: $id) {
+      id
+      groupName
+      description
+      baseRate
+      effectiveDate
+      isActive
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const CREATE_INTEREST_RATE_GROUP = gql`
+  mutation CreateInterestRateGroup($groupName: String!, $description: String, $baseRate: Decimal!, $effectiveDate: Date!) {
+    createInterestRateGroup(groupName: $groupName, description: $description, baseRate: $baseRate, effectiveDate: $effectiveDate) {
+      id
+      groupName
+      baseRate
+      effectiveDate
+      isActive
+    }
+  }
+`;
+
+export const UPDATE_INTEREST_RATE_GROUP_RATE = gql`
+  mutation UpdateInterestRateGroupRate($id: ID!, $newRate: Decimal!, $effectiveDate: Date!, $retroactiveFromDate: Date) {
+    updateInterestRateGroupRate(id: $id, newRate: $newRate, effectiveDate: $effectiveDate, retroactiveFromDate: $retroactiveFromDate) {
+      id
+      groupName
+      baseRate
+      effectiveDate
+    }
+  }
+`;
+
+export const GET_INTEREST_RATE_CHANGE_LOGS = gql`
+  query GetInterestRateChangeLogs($productId: ID) {
+    interestRateChangeLogs(productId: $productId) {
+      id
+      savingsProduct {
+        id
+        productName
+      }
+      interestRateGroup {
+        id
+        groupName
+      }
+      oldRate
+      newRate
+      effectiveDate
+      retroactiveFromDate
+      retroactiveCorrectionAmount
+      accountsAffected
+      processedAt
+      processedBy
+      createdAt
+    }
+  }
+`;
+
+export const CHANGE_PRODUCT_INTEREST_RATE = gql`
+  mutation ChangeProductInterestRate($productId: ID!, $newRate: Decimal!, $effectiveDate: Date!, $retroactiveFromDate: Date) {
+    changeProductInterestRate(productId: $productId, newRate: $newRate, effectiveDate: $effectiveDate, retroactiveFromDate: $retroactiveFromDate) {
+      id
+      oldRate
+      newRate
+      effectiveDate
+      retroactiveFromDate
+      accountsAffected
+    }
+  }
+`;
+
+export const RUN_RETROACTIVE_INTEREST_CORRECTION = gql`
+  mutation RunRetroactiveInterestCorrection($changeLogId: ID!) {
+    runRetroactiveInterestCorrection(changeLogId: $changeLogId) {
+      id
+      retroactiveCorrectionAmount
+      accountsAffected
+      processedAt
+    }
+  }
+`;
+
+// Group Savings
+export const GET_GROUP_SAVINGS_ACCOUNTS = gql`
+  query GetGroupSavingsAccounts {
+    groupSavingsAccounts {
+      id
+      accountNumber
+      groupName
+      description
+      product {
+        id
+        productName
+      }
+      branch {
+        id
+        branchName
+      }
+      accountType
+      balance
+      accruedInterest
+      insuranceFeeBalance
+      status
+      openingDate
+      members {
+        id
+        member {
+          id
+          fullName
+          memberNumber
+        }
+        sharePercentage
+        isActive
+        joinDate
+      }
+      createdAt
+    }
+  }
+`;
+
+export const GET_GROUP_SAVINGS_ACCOUNT = gql`
+  query GetGroupSavingsAccount($id: ID!) {
+    groupSavingsAccount(id: $id) {
+      id
+      accountNumber
+      groupName
+      description
+      product {
+        id
+        productName
+        productCode
+      }
+      branch {
+        id
+        branchName
+      }
+      accountType
+      balance
+      accruedInterest
+      insuranceFeeBalance
+      status
+      openingDate
+      members {
+        id
+        member {
+          id
+          fullName
+          memberNumber
+        }
+        sharePercentage
+        isActive
+        joinDate
+      }
+      createdAt
+    }
+  }
+`;
+
+export const CREATE_GROUP_SAVINGS_ACCOUNT = gql`
+  mutation CreateGroupSavingsAccount($groupName: String!, $productId: ID!, $branchId: ID, $accountType: GroupAccountType!, $description: String) {
+    createGroupSavingsAccount(groupName: $groupName, productId: $productId, branchId: $branchId, accountType: $accountType, description: $description) {
+      id
+      accountNumber
+      groupName
+      accountType
+      status
+    }
+  }
+`;
+
+export const ADD_MEMBER_TO_GROUP = gql`
+  mutation AddMemberToGroup($groupId: ID!, $memberId: ID!, $sharePercentage: Decimal) {
+    addMemberToGroup(groupId: $groupId, memberId: $memberId, sharePercentage: $sharePercentage) {
+      id
+      member {
+        id
+        fullName
+      }
+      sharePercentage
+      isActive
+    }
+  }
+`;
+
+export const REMOVE_MEMBER_FROM_GROUP = gql`
+  mutation RemoveMemberFromGroup($groupId: ID!, $memberId: ID!) {
+    removeMemberFromGroup(groupId: $groupId, memberId: $memberId)
+  }
+`;
+
+export const DEPOSIT_TO_GROUP_ACCOUNT = gql`
+  mutation DepositToGroupAccount($groupId: ID!, $amount: Decimal!, $paymentMethod: PaymentMethod!) {
+    depositToGroupAccount(groupId: $groupId, amount: $amount, paymentMethod: $paymentMethod) {
+      id
+      transactionNumber
+      amount
+      status
+    }
+  }
+`;
+
+export const WITHDRAW_FROM_GROUP_ACCOUNT = gql`
+  mutation WithdrawFromGroupAccount($groupId: ID!, $amount: Decimal!, $paymentMethod: PaymentMethod!) {
+    withdrawFromGroupAccount(groupId: $groupId, amount: $amount, paymentMethod: $paymentMethod) {
+      id
+      transactionNumber
+      amount
+      status
+    }
+  }
+`;
+
+export const CALCULATE_GROUP_INSURANCE_FEES = gql`
+  mutation CalculateGroupInsuranceFees {
+    calculateGroupInsuranceFees
+  }
+`;
+
+// Check Register
+export const GET_CHECK_REGISTER = gql`
+  query GetCheckRegister($accountId: ID!) {
+    checkRegister(accountId: $accountId) {
+      id
+      checkNumber
+      issuedDate
+      amount
+      payee
+      status
+      clearedDate
+      stopDate
+      stopReason
+      createdBy
+      createdAt
+    }
+  }
+`;
+
+export const GET_STOPPED_CHECKS = gql`
+  query GetStoppedChecks($accountId: ID!) {
+    stoppedChecks(accountId: $accountId) {
+      id
+      checkNumber
+      issuedDate
+      amount
+      payee
+      status
+      stopDate
+      stopReason
+    }
+  }
+`;
+
+export const ISSUE_CHECK = gql`
+  mutation IssueCheck($accountId: ID!, $checkNumber: String!, $amount: Decimal, $payee: String) {
+    issueCheck(accountId: $accountId, checkNumber: $checkNumber, amount: $amount, payee: $payee) {
+      id
+      checkNumber
+      issuedDate
+      amount
+      payee
+      status
+    }
+  }
+`;
+
+export const CLEAR_CHECK = gql`
+  mutation ClearCheck($checkId: ID!) {
+    clearCheck(checkId: $checkId) {
+      id
+      checkNumber
+      status
+      clearedDate
+    }
+  }
+`;
+
+export const STOP_CHECK = gql`
+  mutation StopCheck($checkId: ID!, $reason: String!) {
+    stopCheck(checkId: $checkId, reason: $reason) {
+      id
+      checkNumber
+      status
+      stopDate
+      stopReason
+    }
+  }
+`;
+
+export const VOID_CHECK = gql`
+  mutation VoidCheck($checkId: ID!) {
+    voidCheck(checkId: $checkId) {
+      id
+      checkNumber
+      status
+    }
+  }
+`;
+
+// Term Deposits
+export const GET_TERM_DEPOSIT_MATURITY_REPORT = gql`
+  query GetTermDepositMaturityReport($fromDate: Date!, $toDate: Date!) {
+    termDepositMaturityReport(fromDate: $fromDate, toDate: $toDate) {
+      id
+      accountNumber
+      member {
+        id
+        fullName
+        memberNumber
+      }
+      product {
+        id
+        productName
+      }
+      termDepositAmount
+      maturityAmount
+      maturityDate
+      maturityAction
+      matured
+      rolloverCount
+      effectiveInterestRate
+      status
+    }
+  }
+`;
+
+export const PROCESS_TERM_DEPOSIT_MATURITY = gql`
+  mutation ProcessTermDepositMaturity {
+    processTermDepositMaturity
+  }
+`;
+
+export const PREMATURE_WITHDRAW_TERM_DEPOSIT = gql`
+  mutation PrematureWithdrawTermDeposit($accountId: ID!, $reason: String!) {
+    prematureWithdrawTermDeposit(accountId: $accountId, reason: $reason) {
+      id
+      transactionNumber
+      amount
+      status
+    }
+  }
+`;
+
+export const ROLLOVER_TERM_DEPOSIT = gql`
+  mutation RolloverTermDeposit($accountId: ID!, $newRate: Decimal) {
+    rolloverTermDeposit(accountId: $accountId, newRate: $newRate) {
+      id
+      accountNumber
+      maturityDate
+      rolloverCount
+      effectiveInterestRate
+    }
+  }
+`;
+
+// Enhanced Dividends
+export const GET_DIVIDEND_ALLOCATIONS = gql`
+  query GetDividendAllocations($dividendRunId: ID!) {
+    dividendAllocations(dividendRunId: $dividendRunId) {
+      id
+      member {
+        id
+        fullName
+        memberNumber
+      }
+      savingsAccount {
+        id
+        accountNumber
+      }
+      interestPoints
+      allocationAmount
+      taxAmount
+      netAmount
+      posted
+      createdAt
+    }
+  }
+`;
+
+export const CALCULATE_ENHANCED_DIVIDENDS = gql`
+  mutation CalculateEnhancedDividends($year: Int!, $method: String!, $rateOrProfit: Decimal!, $distributionMethod: String!) {
+    calculateEnhancedDividends(year: $year, method: $method, rateOrProfit: $rateOrProfit, distributionMethod: $distributionMethod) {
+      id
+      year
+      method
+      rate
+      totalAmount
+      membersPaid
+      distributionMethod
+      profitFigure
+      totalInterestPoints
+      status
+    }
+  }
+`;
+
+// ===== Lending Enhancement Queries =====
+
+export const GET_LOAN_GROUPS = gql`
+  query GetLoanGroups {
+    loanGroups {
+      id
+      groupNumber
+      groupName
+      description
+      groupLoanType
+      maxGroupLoanAmount
+      jointLiability
+      formationDate
+      isActive
+      members {
+        id
+        member { id firstName lastName memberNumber }
+        liabilityShare
+        roleInGroup
+        joinDate
+        isActive
+      }
+    }
+  }
+`;
+
+export const GET_ACTIVE_LOAN_GROUPS = gql`
+  query GetActiveLoanGroups {
+    activeLoanGroups {
+      id
+      groupNumber
+      groupName
+      groupLoanType
+      maxGroupLoanAmount
+      jointLiability
+      isActive
+    }
+  }
+`;
+
+export const GET_LOAN_GROUP = gql`
+  query GetLoanGroup($id: ID!) {
+    loanGroup(id: $id) {
+      id
+      groupNumber
+      groupName
+      description
+      groupLoanType
+      maxGroupLoanAmount
+      jointLiability
+      formationDate
+      isActive
+      members {
+        id
+        member { id firstName lastName memberNumber phoneNumber }
+        liabilityShare
+        roleInGroup
+        joinDate
+        isActive
+      }
+    }
+  }
+`;
+
+export const CREATE_LOAN_GROUP = gql`
+  mutation CreateLoanGroup($groupName: String!, $description: String, $groupLoanType: String!, $branchId: ID, $maxGroupLoanAmount: Decimal, $jointLiability: Boolean) {
+    createLoanGroup(groupName: $groupName, description: $description, groupLoanType: $groupLoanType, branchId: $branchId, maxGroupLoanAmount: $maxGroupLoanAmount, jointLiability: $jointLiability) {
+      id groupNumber groupName groupLoanType isActive
+    }
+  }
+`;
+
+export const UPDATE_LOAN_GROUP = gql`
+  mutation UpdateLoanGroup($id: ID!, $groupName: String, $description: String, $maxGroupLoanAmount: Decimal, $jointLiability: Boolean, $isActive: Boolean) {
+    updateLoanGroup(id: $id, groupName: $groupName, description: $description, maxGroupLoanAmount: $maxGroupLoanAmount, jointLiability: $jointLiability, isActive: $isActive) {
+      id groupNumber groupName isActive
+    }
+  }
+`;
+
+export const ADD_LOAN_GROUP_MEMBER = gql`
+  mutation AddLoanGroupMember($groupId: ID!, $memberId: ID!, $liabilityShare: Decimal, $roleInGroup: String) {
+    addLoanGroupMember(groupId: $groupId, memberId: $memberId, liabilityShare: $liabilityShare, roleInGroup: $roleInGroup) {
+      id member { id firstName lastName memberNumber } liabilityShare roleInGroup joinDate isActive
+    }
+  }
+`;
+
+export const REMOVE_LOAN_GROUP_MEMBER = gql`
+  mutation RemoveLoanGroupMember($groupId: ID!, $memberId: ID!) {
+    removeLoanGroupMember(groupId: $groupId, memberId: $memberId)
+  }
+`;
+
+export const GET_LOAN_FEE_CONFIGS = gql`
+  query GetLoanFeeConfigs($productId: ID!) {
+    loanFeeConfigs(productId: $productId) {
+      id feeName feeType rate fixedAmount minAmount maxAmount isRefundable chargeOn isActive
+      product { id productName }
+      member { id firstName lastName }
+    }
+  }
+`;
+
+export const CREATE_LOAN_FEE_CONFIG = gql`
+  mutation CreateLoanFeeConfig($feeName: String!, $feeType: String!, $productId: ID, $memberId: ID, $rate: Decimal, $fixedAmount: Decimal, $minAmount: Decimal, $maxAmount: Decimal, $isRefundable: Boolean, $chargeOn: String, $incomeAccountId: ID) {
+    createLoanFeeConfig(feeName: $feeName, feeType: $feeType, productId: $productId, memberId: $memberId, rate: $rate, fixedAmount: $fixedAmount, minAmount: $minAmount, maxAmount: $maxAmount, isRefundable: $isRefundable, chargeOn: $chargeOn, incomeAccountId: $incomeAccountId) {
+      id feeName feeType rate fixedAmount chargeOn isActive
+    }
+  }
+`;
+
+export const UPDATE_LOAN_FEE_CONFIG = gql`
+  mutation UpdateLoanFeeConfig($id: ID!, $feeName: String, $rate: Decimal, $fixedAmount: Decimal, $minAmount: Decimal, $maxAmount: Decimal, $isRefundable: Boolean, $chargeOn: String, $isActive: Boolean) {
+    updateLoanFeeConfig(id: $id, feeName: $feeName, rate: $rate, fixedAmount: $fixedAmount, minAmount: $minAmount, maxAmount: $maxAmount, isRefundable: $isRefundable, chargeOn: $chargeOn, isActive: $isActive) {
+      id feeName feeType rate fixedAmount chargeOn isActive
+    }
+  }
+`;
+
+export const DELETE_LOAN_FEE_CONFIG = gql`
+  mutation DeleteLoanFeeConfig($id: ID!) {
+    deleteLoanFeeConfig(id: $id)
+  }
+`;
+
+export const CALCULATE_LOAN_FEES = gql`
+  query CalculateLoanFees($productId: ID!, $memberId: ID!, $loanAmount: Decimal!, $chargeOn: String) {
+    calculateLoanFees(productId: $productId, memberId: $memberId, loanAmount: $loanAmount, chargeOn: $chargeOn)
+  }
+`;
+
+export const GET_LOAN_DEFERMENTS = gql`
+  query GetLoanDeferments($loanId: ID!) {
+    loanDeferments(loanId: $loanId) {
+      id defermentType startDate endDate installmentsDeferred reason approvedBy createdAt
+    }
+  }
+`;
+
+export const DEFER_LOAN_PAYMENT = gql`
+  mutation DeferLoanPayment($loanId: ID!, $installmentsToDefer: Int!, $reason: String!) {
+    deferLoanPayment(loanId: $loanId, installmentsToDefer: $installmentsToDefer, reason: $reason) {
+      id defermentType startDate endDate installmentsDeferred reason
+    }
+  }
+`;
+
+export const SUSPEND_PENALTY = gql`
+  mutation SuspendPenalty($loanId: ID!, $suspendUntil: Date!, $reason: String!) {
+    suspendPenalty(loanId: $loanId, suspendUntil: $suspendUntil, reason: $reason) {
+      id loanNumber penaltySuspended penaltySuspendedUntil
+    }
+  }
+`;
+
+export const RESUME_PENALTY = gql`
+  mutation ResumePenalty($loanId: ID!) {
+    resumePenalty(loanId: $loanId) {
+      id loanNumber penaltySuspended
+    }
+  }
+`;
+
+export const PREVIEW_LOAN_SCHEDULE = gql`
+  query PreviewLoanSchedule($productId: ID!, $principal: Decimal!, $termMonths: Int!, $interestRateOverride: Decimal, $frequencyOverride: String, $firstPaymentDate: Date, $paymentDayOfMonth: Int, $scheduleTypeOverride: String, $balloonPercentageOverride: Decimal) {
+    previewLoanSchedule(productId: $productId, principal: $principal, termMonths: $termMonths, interestRateOverride: $interestRateOverride, frequencyOverride: $frequencyOverride, firstPaymentDate: $firstPaymentDate, paymentDayOfMonth: $paymentDayOfMonth, scheduleTypeOverride: $scheduleTypeOverride, balloonPercentageOverride: $balloonPercentageOverride)
+  }
+`;
+
+export const CHANGE_LOAN_INTEREST_RATE = gql`
+  mutation ChangeLoanInterestRate($loanId: ID!, $newRate: Decimal!) {
+    changeLoanInterestRate(loanId: $loanId, newRate: $newRate) {
+      id loanNumber interestRate effectiveInterestRate rateEffectiveDate
+    }
+  }
+`;
+
+export const CHANGE_PRODUCT_LOAN_RATE = gql`
+  mutation ChangeProductLoanRate($productId: ID!, $newRate: Decimal!) {
+    changeProductLoanRate(productId: $productId, newRate: $newRate)
+  }
+`;
+
+export const RECALCULATE_LOAN_SCHEDULE = gql`
+  mutation RecalculateLoanSchedule($loanId: ID!) {
+    recalculateLoanSchedule(loanId: $loanId)
+  }
+`;
+
+// ===== Cashier/Teller Sessions =====
+
+export const GET_ACTIVE_SESSION = gql`
+  query GetActiveSession($userId: ID!) {
+    activeSession(userId: $userId) {
+      id user { id username fullName } branch { id branchName }
+      openingBalance closingBalance cashInTotal cashOutTotal
+      expectedBalance actualBalance discrepancy
+      status openedAt closedAt reconciledAt reconciledBy notes
+    }
+  }
+`;
+
+export const GET_CASHIER_SESSION = gql`
+  query GetCashierSession($id: ID!) {
+    cashierSession(id: $id) {
+      id user { id username fullName } branch { id branchName }
+      openingBalance closingBalance cashInTotal cashOutTotal
+      expectedBalance actualBalance discrepancy
+      status openedAt closedAt reconciledAt reconciledBy notes
+    }
+  }
+`;
+
+export const GET_OPEN_SESSIONS_BY_BRANCH = gql`
+  query GetOpenSessionsByBranch($branchId: ID!) {
+    openSessionsByBranch(branchId: $branchId) {
+      id user { id username fullName } branch { id branchName }
+      openingBalance cashInTotal cashOutTotal status openedAt
+    }
+  }
+`;
+
+export const GET_SESSION_HISTORY = gql`
+  query GetSessionHistory($userId: ID!, $page: Int, $size: Int) {
+    sessionHistory(userId: $userId, page: $page, size: $size) {
+      content {
+        id user { id username fullName } branch { id branchName }
+        openingBalance closingBalance cashInTotal cashOutTotal
+        expectedBalance actualBalance discrepancy
+        status openedAt closedAt reconciledAt
+      }
+      totalElements totalPages
+    }
+  }
+`;
+
+export const GET_DRAWER_TRANSACTIONS = gql`
+  query GetDrawerTransactions($sessionId: ID!) {
+    drawerTransactions(sessionId: $sessionId) {
+      id cashDirection amount runningBalance currencyCode description createdAt
+      transaction { id transactionNumber }
+    }
+  }
+`;
+
+export const OPEN_CASHIER_SESSION = gql`
+  mutation OpenCashierSession($userId: ID!, $branchId: ID!, $openingBalance: Decimal) {
+    openCashierSession(userId: $userId, branchId: $branchId, openingBalance: $openingBalance) {
+      id status openingBalance openedAt
+      user { id username fullName } branch { id branchName }
+    }
+  }
+`;
+
+export const CLOSE_CASHIER_SESSION = gql`
+  mutation CloseCashierSession($sessionId: ID!) {
+    closeCashierSession(sessionId: $sessionId) {
+      id status closingBalance expectedBalance closedAt
+      cashInTotal cashOutTotal
+    }
+  }
+`;
+
+export const RECONCILE_CASHIER_SESSION = gql`
+  mutation ReconcileCashierSession($sessionId: ID!, $actualCash: Decimal!, $notes: String) {
+    reconcileCashierSession(sessionId: $sessionId, actualCash: $actualCash, notes: $notes) {
+      id status actualBalance expectedBalance discrepancy reconciledAt reconciledBy
+    }
+  }
+`;
+
+// ===== FX Positions =====
+
+export const GET_FX_POSITIONS = gql`
+  query GetFxPositions($branchId: ID) {
+    fxPositions(branchId: $branchId) {
+      id currencyCode positionAmount averageRate unrealizedPnL lastUpdated
+      branch { id branchName }
+    }
+  }
+`;
+
+export const GET_FX_POSITION_HISTORY = gql`
+  query GetFxPositionHistory($currencyCode: String!, $from: DateTime!, $to: DateTime!) {
+    fxPositionHistory(currencyCode: $currencyCode, from: $from, to: $to) {
+      id currencyCode positionBefore positionAfter changeAmount exchangeRate createdAt
+      transaction { id transactionNumber }
+      branch { id branchName }
+    }
+  }
+`;
+
+// ===== Branch Settlements =====
+
+export const GET_BRANCH_SETTLEMENTS = gql`
+  query GetBranchSettlements($branchId: ID) {
+    branchSettlements(branchId: $branchId) {
+      id fromBranch { id branchName } toBranch { id branchName }
+      settlementDate totalAmount transactionCount status
+      settledAt settledBy referenceNumber notes createdAt
+    }
+  }
+`;
+
+export const GET_PENDING_SETTLEMENTS = gql`
+  query GetPendingSettlements {
+    pendingBranchSettlements {
+      id fromBranch { id branchName } toBranch { id branchName }
+      settlementDate totalAmount transactionCount status referenceNumber createdAt
+    }
+  }
+`;
+
+export const CREATE_BRANCH_SETTLEMENT = gql`
+  mutation CreateBranchSettlement($fromBranchId: ID!, $toBranchId: ID!, $settlementDate: Date!, $totalAmount: Decimal!, $transactionCount: Int, $notes: String) {
+    createBranchSettlement(fromBranchId: $fromBranchId, toBranchId: $toBranchId, settlementDate: $settlementDate, totalAmount: $totalAmount, transactionCount: $transactionCount, notes: $notes) {
+      id referenceNumber status totalAmount settlementDate
+      fromBranch { id branchName } toBranch { id branchName }
+    }
+  }
+`;
+
+export const SETTLE_BRANCH_SETTLEMENT = gql`
+  mutation SettleBranchSettlement($settlementId: ID!) {
+    settleBranchSettlement(settlementId: $settlementId) {
+      id status settledAt settledBy
+    }
+  }
+`;
+
+export const UPDATE_PREFERRED_LANGUAGE = gql`
+  mutation UpdatePreferredLanguage($language: String!) {
+    updatePreferredLanguage(language: $language)
   }
 `;

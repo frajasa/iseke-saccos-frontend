@@ -288,7 +288,7 @@ export default function SavingsProductDetailPage() {
           <h2 className="text-lg font-semibold text-foreground mb-4">
             Additional Settings
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Dormancy Period</p>
               <p className="text-foreground font-medium">
@@ -299,6 +299,12 @@ export default function SavingsProductDetailPage() {
               <p className="text-sm text-muted-foreground">Allows Overdraft</p>
               <p className="text-foreground font-medium">
                 {product.allowsOverdraft ? "Yes" : "No"}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Account Sub-Type</p>
+              <p className="text-foreground font-medium">
+                {product.accountSubType || "N/A"}
               </p>
             </div>
             <div>
@@ -313,6 +319,174 @@ export default function SavingsProductDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Enhanced Interest Config */}
+        {(product.interestCalcMethod || product.interestPayFrequency || product.hasSteppedRates || product.useBaseRate) && (
+          <div className="bg-card rounded-xl border border-border p-6 lg:col-span-2">
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              Enhanced Interest Settings
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {product.interestCalcMethod && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Calc Method (Enhanced)</p>
+                  <p className="text-foreground font-medium">{product.interestCalcMethod.replace(/_/g, " ")}</p>
+                </div>
+              )}
+              {product.interestPayFrequency && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Pay Frequency (Enhanced)</p>
+                  <p className="text-foreground font-medium">{product.interestPayFrequency.replace(/_/g, " ")}</p>
+                </div>
+              )}
+              <div>
+                <p className="text-sm text-muted-foreground">Stepped Rates</p>
+                <p className="text-foreground font-medium">{product.hasSteppedRates ? "Yes" : "No"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Uses Base Rate</p>
+                <p className="text-foreground font-medium">{product.useBaseRate ? "Yes" : "No"}</p>
+              </div>
+              {product.interestRateGroup && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Rate Group</p>
+                  <p className="text-foreground font-medium">{product.interestRateGroup}</p>
+                </div>
+              )}
+              {product.baseRateSpread != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Base Rate Spread</p>
+                  <p className="text-foreground font-medium">{Number(product.baseRateSpread) * 100}%</p>
+                </div>
+              )}
+              <div>
+                <p className="text-sm text-muted-foreground">Tax Exempt Product</p>
+                <p className="text-foreground font-medium">{product.taxExemptProduct ? "Yes" : "No"}</p>
+              </div>
+              {product.userDefinedPaymentDays && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Payment Days</p>
+                  <p className="text-foreground font-medium">{product.userDefinedPaymentDays} days</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Term Deposit Settings */}
+        {(product.termDays || product.maturityAction || product.prematureWithdrawalPenaltyRate) && (
+          <div className="bg-card rounded-xl border border-border p-6 lg:col-span-2">
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              Term Deposit Settings
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {product.termDays && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Term (Days)</p>
+                  <p className="text-foreground font-medium">{product.termDays}</p>
+                </div>
+              )}
+              {product.maturityAction && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Maturity Action</p>
+                  <p className="text-foreground font-medium">{product.maturityAction.replace(/_/g, " ")}</p>
+                </div>
+              )}
+              {product.postMaturityInterestRate != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Post-Maturity Rate</p>
+                  <p className="text-foreground font-medium">{Number(product.postMaturityInterestRate) * 100}%</p>
+                </div>
+              )}
+              <div>
+                <p className="text-sm text-muted-foreground">Auto Renew</p>
+                <p className="text-foreground font-medium">{product.autoRenewAtCurrentRate ? "Yes" : "No"}</p>
+              </div>
+              {product.prematureWithdrawalPenaltyRate != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Premature Penalty</p>
+                  <p className="text-foreground font-medium">{Number(product.prematureWithdrawalPenaltyRate) * 100}%</p>
+                </div>
+              )}
+              {product.prematureWithdrawalInterestReduction != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Interest Reduction</p>
+                  <p className="text-foreground font-medium">{Number(product.prematureWithdrawalInterestReduction) * 100}%</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Overdraft & Withdrawal Limits */}
+        {(product.overdraftLimit || product.withdrawalAmountLimit || product.withdrawalAmountLimitMonthly) && (
+          <div className="bg-card rounded-xl border border-border p-6 lg:col-span-2">
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              Enhanced Limits & Overdraft
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {product.withdrawalAmountLimit != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Withdrawal Amount Limit</p>
+                  <p className="text-foreground font-medium">{formatCurrency(product.withdrawalAmountLimit)}</p>
+                </div>
+              )}
+              {product.withdrawalAmountLimitMonthly != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Monthly Withdrawal Limit</p>
+                  <p className="text-foreground font-medium">{formatCurrency(product.withdrawalAmountLimitMonthly)}</p>
+                </div>
+              )}
+              {product.excessWithdrawalFee != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Excess Withdrawal Fee</p>
+                  <p className="text-foreground font-medium">{formatCurrency(product.excessWithdrawalFee)}</p>
+                </div>
+              )}
+              {product.overdraftLimit != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Overdraft Limit</p>
+                  <p className="text-foreground font-medium">{formatCurrency(product.overdraftLimit)}</p>
+                </div>
+              )}
+              {product.overdraftFeeFlat != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Overdraft Fee (Flat)</p>
+                  <p className="text-foreground font-medium">{formatCurrency(product.overdraftFeeFlat)}</p>
+                </div>
+              )}
+              {product.overdraftInterestRate != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Overdraft Interest Rate</p>
+                  <p className="text-foreground font-medium">{Number(product.overdraftInterestRate) * 100}%</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Group Insurance */}
+        {(product.groupInsuranceFeeRate || product.groupInsuranceFeeFlat) && (
+          <div className="bg-card rounded-xl border border-border p-6 lg:col-span-2">
+            <h2 className="text-lg font-semibold text-foreground mb-4">
+              Group Insurance
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              {product.groupInsuranceFeeRate != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Insurance Fee Rate</p>
+                  <p className="text-foreground font-medium">{Number(product.groupInsuranceFeeRate) * 100}%</p>
+                </div>
+              )}
+              {product.groupInsuranceFeeFlat != null && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Insurance Fee (Flat)</p>
+                  <p className="text-foreground font-medium">{formatCurrency(product.groupInsuranceFeeFlat)}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Metadata */}

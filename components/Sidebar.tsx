@@ -30,6 +30,17 @@ import {
   Clock,
   Upload,
   Printer,
+  TrendingUp,
+  UsersRound,
+  FileCheck,
+  Timer,
+  PiggyBank,
+  HandCoins,
+  CalendarRange,
+  UserCheck,
+  Banknote,
+  DollarSign,
+  GitBranch,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Shield } from "lucide-react";
@@ -52,6 +63,15 @@ const navigation = [
       { name: "Transactions", href: "/transactions", icon: ArrowLeftRight, permissions: ["VIEW_TRANSACTIONS"], roles: ["ADMIN", "MANAGER", "CASHIER", "ACCOUNTANT"] },
       { name: "Transfer", href: "/transactions/transfer", icon: ArrowRightLeft, permissions: ["TRANSFER_ACCOUNTS"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
       { name: "Payments", href: "/dashboard/payments", icon: Smartphone, permissions: ["VIEW_PAYMENTS"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
+      { name: "Group Savings", href: "/dashboard/group-savings", icon: UsersRound, permissions: ["VIEW_SAVINGS", "MANAGE_SAVINGS"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
+      { name: "Check Register", href: "/dashboard/check-register", icon: FileCheck, permissions: ["VIEW_SAVINGS", "MANAGE_SAVINGS"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
+      { name: "Term Deposits", href: "/dashboard/term-deposits", icon: Timer, permissions: ["VIEW_SAVINGS", "MANAGE_SAVINGS"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Rate Groups", href: "/dashboard/interest-rate-groups", icon: TrendingUp, permissions: ["VIEW_SAVINGS", "MANAGE_SAVINGS"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Dividends", href: "/dashboard/enhanced-dividends", icon: PiggyBank, permissions: ["VIEW_SAVINGS", "MANAGE_SAVINGS"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
+      { name: "Loan Groups", href: "/dashboard/loan-groups", icon: UserCheck, permissions: ["VIEW_LOANS", "MANAGE_LOANS"], roles: ["ADMIN", "MANAGER", "LOAN_OFFICER"] },
+      { name: "Loan Fees", href: "/dashboard/loan-fees", icon: HandCoins, permissions: ["VIEW_LOANS", "MANAGE_LOANS"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Schedule Preview", href: "/dashboard/schedule-preview", icon: CalendarRange, permissions: ["VIEW_LOANS", "MANAGE_LOANS"], roles: ["ADMIN", "MANAGER", "LOAN_OFFICER", "CASHIER"] },
+      { name: "Cashier", href: "/dashboard/cashier", icon: Banknote, permissions: ["CASHIER_SESSION_OPEN", "CASHIER_SESSION_VIEW"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
     ],
   },
   {
@@ -64,6 +84,8 @@ const navigation = [
       { name: "Users", href: "/users", icon: UserCog, permissions: ["VIEW_USERS"], roles: ["ADMIN", "MANAGER"] },
       { name: "Roles", href: "/dashboard/roles", icon: Shield, permissions: ["MANAGE_ROLES"], roles: ["ADMIN"] },
       { name: "Currencies", href: "/dashboard/currencies", icon: Coins, permissions: ["VIEW_CURRENCIES", "MANAGE_CURRENCIES"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
+      { name: "FX Positions", href: "/dashboard/fx-positions", icon: DollarSign, permissions: ["VIEW_FX_POSITIONS"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
+      { name: "Settlements", href: "/dashboard/branch-settlements", icon: GitBranch, permissions: ["MANAGE_BRANCH_SETTLEMENTS"], roles: ["ADMIN", "MANAGER"] },
       { name: "Txn Limits", href: "/dashboard/transaction-limits", icon: ShieldCheck, permissions: ["MANAGE_TRANSACTION_LIMITS"], roles: ["ADMIN", "MANAGER"] },
       { name: "Sessions", href: "/dashboard/session-restrictions", icon: Clock, permissions: ["MANAGE_SESSION_RESTRICTIONS"], roles: ["ADMIN"] },
       { name: "Batch Import", href: "/dashboard/batch-import", icon: Upload, permissions: ["MANAGE_BATCH_IMPORTS"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
@@ -91,13 +113,13 @@ export default function Sidebar() {
     .map((group) => ({
       ...group,
       items: group.items.filter((item) => {
-        // If user has permissions loaded, use permission-based filtering
-        if (userPermissions.length > 0) {
-          // Items with empty permissions array are always visible (e.g., Change Password)
-          if (item.permissions.length === 0) return true;
-          return item.permissions.some((p) => userPermissions.includes(p));
+        // Items with empty permissions array are always visible (e.g., Change Password)
+        if (item.permissions.length === 0) return true;
+        // Permission-based filtering (primary)
+        if (userPermissions.length > 0 && item.permissions.some((p) => userPermissions.includes(p))) {
+          return true;
         }
-        // Fallback to role-based filtering
+        // Role-based filtering (fallback — covers new permissions not yet in token)
         return user?.role ? item.roles.includes(user.role) : false;
       }),
     }))

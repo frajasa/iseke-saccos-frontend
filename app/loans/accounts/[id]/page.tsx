@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { GET_LOAN_ACCOUNT, GET_LOAN_REPAYMENT_SCHEDULE, GET_LOAN_TRANSACTIONS, APPROVE_LOAN, DISBURSE_LOAN, ADD_GUARANTOR, ADD_COLLATERAL, WRITE_OFF_LOAN, REFINANCE_LOAN } from "@/lib/graphql/queries";
+import { GET_LOAN_ACCOUNT, GET_LOAN_REPAYMENT_SCHEDULE, GET_LOAN_TRANSACTIONS, APPROVE_LOAN, DISBURSE_LOAN, ADD_GUARANTOR, ADD_COLLATERAL, WRITE_OFF_LOAN, REFINANCE_LOAN, DEFER_LOAN_PAYMENT, SUSPEND_PENALTY, RESUME_PENALTY, CHANGE_LOAN_INTEREST_RATE, RECALCULATE_LOAN_SCHEDULE } from "@/lib/graphql/queries";
 import { ArrowLeft, DollarSign, Calendar, AlertCircle, ChevronLeft, ChevronRight, Receipt, CheckCircle, Banknote, UserPlus, Shield, Plus } from "lucide-react";
 import Link from "next/link";
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils";
@@ -40,6 +40,11 @@ export default function LoanAccountDetailPage() {
   const [addCollateral, { loading: addingCollateral }] = useMutation(ADD_COLLATERAL, { refetchQueries: refetchAll });
   const [writeOffLoan, { loading: writingOff }] = useMutation(WRITE_OFF_LOAN, { refetchQueries: refetchAll });
   const [refinanceLoan, { loading: refinancing }] = useMutation(REFINANCE_LOAN, { refetchQueries: refetchAll });
+  const [deferLoanPayment, { loading: deferring }] = useMutation(DEFER_LOAN_PAYMENT, { refetchQueries: refetchAll });
+  const [suspendPenalty, { loading: suspendingPenalty }] = useMutation(SUSPEND_PENALTY, { refetchQueries: refetchAll });
+  const [resumePenalty, { loading: resumingPenalty }] = useMutation(RESUME_PENALTY, { refetchQueries: refetchAll });
+  const [changeLoanRate, { loading: changingRate }] = useMutation(CHANGE_LOAN_INTEREST_RATE, { refetchQueries: refetchAll });
+  const [recalculateSchedule, { loading: recalculating }] = useMutation(RECALCULATE_LOAN_SCHEDULE, { refetchQueries: refetchAll });
 
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showDisburseModal, setShowDisburseModal] = useState(false);
@@ -47,7 +52,13 @@ export default function LoanAccountDetailPage() {
   const [showCollateralModal, setShowCollateralModal] = useState(false);
   const [showWriteOffModal, setShowWriteOffModal] = useState(false);
   const [showRefinanceModal, setShowRefinanceModal] = useState(false);
+  const [showDeferModal, setShowDeferModal] = useState(false);
+  const [showPenaltyModal, setShowPenaltyModal] = useState(false);
+  const [showRateChangeModal, setShowRateChangeModal] = useState(false);
   const [writeOffReason, setWriteOffReason] = useState("");
+  const [deferForm, setDeferForm] = useState({ installmentsToDefer: "1", reason: "" });
+  const [penaltyForm, setPenaltyForm] = useState({ suspendUntil: "", reason: "" });
+  const [newRate, setNewRate] = useState("");
   const [refinanceForm, setRefinanceForm] = useState({ newTermMonths: "", newInterestRate: "", reason: "" });
   const [approvedAmount, setApprovedAmount] = useState("");
   const [disbursementDate, setDisbursementDate] = useState(new Date().toISOString().split("T")[0]);
@@ -170,6 +181,73 @@ export default function LoanAccountDetailPage() {
     }
   };
 
+  const handleDeferPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await deferLoanPayment({
+        variables: {
+          loanId: id,
+          installmentsToDefer: parseInt(deferForm.installmentsToDefer),
+          reason: deferForm.reason,
+        },
+      });
+      toast.success("Payment deferred successfully");
+      setShowDeferModal(false);
+      setDeferForm({ installmentsToDefer: "1", reason: "" });
+      refetch();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to defer payment");
+    }
+  };
+
+  const handleSuspendPenalty = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await suspendPenalty({
+        variables: { loanId: id, suspendUntil: penaltyForm.suspendUntil, reason: penaltyForm.reason },
+      });
+      toast.success("Penalty suspended successfully");
+      setShowPenaltyModal(false);
+      setPenaltyForm({ suspendUntil: "", reason: "" });
+      refetch();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to suspend penalty");
+    }
+  };
+
+  const handleResumePenalty = async () => {
+    try {
+      await resumePenalty({ variables: { loanId: id } });
+      toast.success("Penalty resumed");
+      refetch();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to resume penalty");
+    }
+  };
+
+  const handleChangeRate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await changeLoanRate({ variables: { loanId: id, newRate: parseFloat(newRate) } });
+      toast.success("Interest rate changed successfully");
+      setShowRateChangeModal(false);
+      setNewRate("");
+      refetch();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to change rate");
+    }
+  };
+
+  const handleRecalculate = async () => {
+    try {
+      await recalculateSchedule({ variables: { loanId: id } });
+      toast.success("Schedule recalculated");
+      refetch();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to recalculate");
+    }
+  };
+
   const loan = data?.loanAccount;
   const transactions = txnData?.loanTransactions || [];
   const scheduleResult = scheduleData?.loanRepaymentSchedule;
@@ -265,6 +343,28 @@ export default function LoanAccountDetailPage() {
               >
                 <AlertCircle className="w-4 h-4" />
                 Write Off
+              </button>
+              {loan.product?.allowsDeferment && (
+                <button onClick={() => setShowDeferModal(true)}
+                  className="inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
+                  Defer Payment
+                </button>
+              )}
+              {loan.product?.allowsPenaltySuspension && (
+                <button onClick={() => loan.penaltySuspended ? handleResumePenalty() : setShowPenaltyModal(true)}
+                  className={`inline-flex items-center justify-center gap-2 font-semibold px-4 py-2 rounded-lg transition-colors ${loan.penaltySuspended ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-orange-600 hover:bg-orange-700 text-white'}`}>
+                  {loan.penaltySuspended ? 'Resume Penalty' : 'Suspend Penalty'}
+                </button>
+              )}
+              {loan.product?.allowsVariableRate && (
+                <button onClick={() => setShowRateChangeModal(true)}
+                  className="inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
+                  Change Rate
+                </button>
+              )}
+              <button onClick={() => handleRecalculate()} disabled={recalculating}
+                className="inline-flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                {recalculating ? 'Recalculating...' : 'Recalculate Schedule'}
               </button>
             </>
           )}
@@ -1021,6 +1121,90 @@ export default function LoanAccountDetailPage() {
                 <button type="button" onClick={() => setShowRefinanceModal(false)} className="flex-1 px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-all font-medium">Cancel</button>
                 <button type="submit" disabled={refinancing} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold disabled:opacity-50">
                   {refinancing ? "Processing..." : "Refinance Loan"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Defer Payment Modal */}
+      {showDeferModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Defer Loan Payment</h3>
+            <form onSubmit={handleDeferPayment} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Installments to Defer *</label>
+                <input type="number" value={deferForm.installmentsToDefer}
+                  onChange={(e) => setDeferForm({ ...deferForm, installmentsToDefer: e.target.value })}
+                  className="w-full border border-input rounded-lg p-2 bg-background text-foreground" min="1" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Reason *</label>
+                <textarea value={deferForm.reason}
+                  onChange={(e) => setDeferForm({ ...deferForm, reason: e.target.value })}
+                  className="w-full border border-input rounded-lg p-2 bg-background text-foreground" rows={2} required />
+              </div>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setShowDeferModal(false)} className="flex-1 px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-all font-medium">Cancel</button>
+                <button type="submit" disabled={deferring} className="flex-1 px-4 py-2.5 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-all font-semibold disabled:opacity-50">
+                  {deferring ? "Processing..." : "Defer Payment"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Suspend Penalty Modal */}
+      {showPenaltyModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Suspend Penalty</h3>
+            <form onSubmit={handleSuspendPenalty} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Suspend Until *</label>
+                <input type="date" value={penaltyForm.suspendUntil}
+                  onChange={(e) => setPenaltyForm({ ...penaltyForm, suspendUntil: e.target.value })}
+                  className="w-full border border-input rounded-lg p-2 bg-background text-foreground" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Reason *</label>
+                <textarea value={penaltyForm.reason}
+                  onChange={(e) => setPenaltyForm({ ...penaltyForm, reason: e.target.value })}
+                  className="w-full border border-input rounded-lg p-2 bg-background text-foreground" rows={2} required />
+              </div>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setShowPenaltyModal(false)} className="flex-1 px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-all font-medium">Cancel</button>
+                <button type="submit" disabled={suspendingPenalty} className="flex-1 px-4 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all font-semibold disabled:opacity-50">
+                  {suspendingPenalty ? "Processing..." : "Suspend Penalty"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Change Rate Modal */}
+      {showRateChangeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border rounded-xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Change Interest Rate</h3>
+            <form onSubmit={handleChangeRate} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">Current Rate: {loan?.interestRate ? (parseFloat(loan.interestRate) * 100).toFixed(2) : 0}%</label>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-1">New Rate (decimal, e.g., 0.18 for 18%) *</label>
+                <input type="number" step="0.0001" value={newRate}
+                  onChange={(e) => setNewRate(e.target.value)}
+                  className="w-full border border-input rounded-lg p-2 bg-background text-foreground" min="0" required />
+              </div>
+              <div className="flex gap-3">
+                <button type="button" onClick={() => setShowRateChangeModal(false)} className="flex-1 px-4 py-2.5 border border-border rounded-lg hover:bg-muted transition-all font-medium">Cancel</button>
+                <button type="submit" disabled={changingRate} className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all font-semibold disabled:opacity-50">
+                  {changingRate ? "Processing..." : "Change Rate"}
                 </button>
               </div>
             </form>
