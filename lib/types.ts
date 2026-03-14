@@ -1805,3 +1805,89 @@ export interface BranchSettlement {
   notes?: string;
   createdAt?: string;
 }
+
+// Fixed Assets
+export interface FixedAsset {
+  id: string;
+  assetCode: string;
+  assetName: string;
+  description?: string;
+  category: string;
+  acquisitionDate: string;
+  acquisitionCost: number;
+  usefulLifeMonths: number;
+  residualValue: number;
+  depreciationMethod: string;
+  depreciationRate?: number;
+  accumulatedDepreciation: number;
+  netBookValue: number;
+  location?: string;
+  serialNumber?: string;
+  supplier?: string;
+  warrantyExpiry?: string;
+  status: string;
+  disposalDate?: string;
+  disposalAmount?: number;
+  branch: { id: string; name: string } | null;
+  createdAt: string;
+}
+
+export interface FixedAssetDepreciation {
+  id: string;
+  periodDate: string;
+  depreciationAmount: number;
+  accumulatedAfter: number;
+  netBookValueAfter: number;
+  postedBy?: string;
+  createdAt: string;
+}
+
+// Budget
+export interface Budget {
+  id: string;
+  budgetName: string;
+  fiscalYear: number;
+  startDate: string;
+  endDate: string;
+  status: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  branch?: { id: string; name: string } | null;
+  notes?: string;
+  createdBy?: string;
+  createdAt: string;
+}
+
+export interface BudgetLine {
+  id: string;
+  account: { id: string; accountCode: string; accountName: string };
+  periodMonth: number;
+  budgetedAmount: number;
+  notes?: string;
+}
+
+// Cost Centers
+export interface CostCenter {
+  id: string;
+  centerCode: string;
+  centerName: string;
+  description?: string;
+  centerType: string;
+  parentCenter?: { id: string; centerName: string } | null;
+  branch?: { id: string; name: string } | null;
+  managerName?: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+// Joint Account Holders
+export interface JointAccountHolder {
+  id: string;
+  savingsAccount: { id: string; accountNumber: string };
+  member: { id: string; memberNumber: string; fullName: string };
+  relationship: string;
+  canTransact: boolean;
+  canClose: boolean;
+  addedDate: string;
+  isActive: boolean;
+}

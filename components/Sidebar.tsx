@@ -43,7 +43,7 @@ import {
   GitBranch,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Shield } from "lucide-react";
+import { Shield, Package, PieChart, Target, UserPlus } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 // Each nav item requires at least one of the listed permissions to be visible
@@ -90,6 +90,10 @@ const navigation = [
       { name: "Sessions", href: "/dashboard/session-restrictions", icon: Clock, permissions: ["MANAGE_SESSION_RESTRICTIONS"], roles: ["ADMIN"] },
       { name: "Batch Import", href: "/dashboard/batch-import", icon: Upload, permissions: ["MANAGE_BATCH_IMPORTS"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
       { name: "Passbook", href: "/dashboard/passbook", icon: Printer, permissions: ["VIEW_PASSBOOK"], roles: ["ADMIN", "MANAGER", "CASHIER"] },
+      { name: "Fixed Assets", href: "/dashboard/fixed-assets", icon: Package, permissions: ["FIXED_ASSETS_VIEW"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
+      { name: "Budgets", href: "/dashboard/budgets", icon: PieChart, permissions: ["BUDGET_VIEW"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
+      { name: "Cost Centers", href: "/dashboard/cost-centers", icon: Target, permissions: ["COST_CENTER_VIEW"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
+      { name: "Joint Accounts", href: "/dashboard/joint-accounts", icon: UserPlus, permissions: [], roles: ["ADMIN", "MANAGER", "CASHIER"] },
       { name: "Settings", href: "/dashboard/settings", icon: Settings, permissions: ["MANAGE_SETTINGS"], roles: ["ADMIN"] },
       { name: "Change Password", href: "/dashboard/change-password", icon: Lock, permissions: [], roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER", "ACCOUNTANT"] },
     ],

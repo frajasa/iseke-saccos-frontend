@@ -1546,6 +1546,34 @@ export const SETUP_PAYROLL_DEDUCTION = gql`
   }
 `;
 
+export const GET_ALL_SERVICE_REQUESTS = gql`
+  query GetAllServiceRequests($status: String, $page: Int, $size: Int) {
+    allServiceRequests(status: $status, page: $page, size: $size) {
+      content {
+        id
+        requestNumber
+        member {
+          id
+          memberNumber
+          firstName
+          lastName
+          fullName
+          phoneNumber
+        }
+        requestType
+        status
+        amount
+        description
+        reviewNotes
+        reviewedAt
+        createdAt
+      }
+      totalElements
+      totalPages
+    }
+  }
+`;
+
 export const REVIEW_ESS_REQUEST = gql`
   mutation ReviewEssRequest($requestId: ID!, $status: String!, $reviewNotes: String) {
     reviewEssRequest(requestId: $requestId, status: $status, reviewNotes: $reviewNotes) {
@@ -3270,5 +3298,237 @@ export const SETTLE_BRANCH_SETTLEMENT = gql`
 export const UPDATE_PREFERRED_LANGUAGE = gql`
   mutation UpdatePreferredLanguage($language: String!) {
     updatePreferredLanguage(language: $language)
+  }
+`;
+
+// Fixed Assets
+export const GET_FIXED_ASSETS = gql`
+  query GetFixedAssets {
+    fixedAssets {
+      id assetCode assetName description category acquisitionDate acquisitionCost
+      usefulLifeMonths residualValue depreciationMethod depreciationRate
+      accumulatedDepreciation netBookValue location serialNumber supplier
+      warrantyExpiry status disposalDate disposalAmount
+      branch { id branchName }
+      createdAt
+    }
+  }
+`;
+
+export const GET_ASSET_DEPRECIATION_HISTORY = gql`
+  query GetAssetDepreciationHistory($assetId: ID!) {
+    assetDepreciationHistory(assetId: $assetId) {
+      id periodDate depreciationAmount accumulatedAfter netBookValueAfter postedBy createdAt
+    }
+  }
+`;
+
+export const CREATE_FIXED_ASSET = gql`
+  mutation CreateFixedAsset(
+    $assetName: String!, $description: String, $category: String!,
+    $acquisitionDate: Date!, $acquisitionCost: Decimal!, $usefulLifeMonths: Int!,
+    $residualValue: Decimal, $depreciationMethod: String!, $depreciationRate: Decimal,
+    $location: String, $serialNumber: String, $supplier: String, $warrantyExpiry: Date,
+    $assetAccountId: ID, $depreciationExpenseAccountId: ID, $accumulatedDepreciationAccountId: ID,
+    $branchId: ID
+  ) {
+    createFixedAsset(
+      assetName: $assetName, description: $description, category: $category,
+      acquisitionDate: $acquisitionDate, acquisitionCost: $acquisitionCost,
+      usefulLifeMonths: $usefulLifeMonths, residualValue: $residualValue,
+      depreciationMethod: $depreciationMethod, depreciationRate: $depreciationRate,
+      location: $location, serialNumber: $serialNumber, supplier: $supplier,
+      warrantyExpiry: $warrantyExpiry, assetAccountId: $assetAccountId,
+      depreciationExpenseAccountId: $depreciationExpenseAccountId,
+      accumulatedDepreciationAccountId: $accumulatedDepreciationAccountId,
+      branchId: $branchId
+    ) {
+      id assetCode assetName description category acquisitionDate acquisitionCost
+      usefulLifeMonths residualValue depreciationMethod depreciationRate
+      accumulatedDepreciation netBookValue location serialNumber supplier
+      warrantyExpiry status branch { id branchName } createdAt
+    }
+  }
+`;
+
+export const UPDATE_FIXED_ASSET = gql`
+  mutation UpdateFixedAsset(
+    $id: ID!, $assetName: String, $description: String, $location: String,
+    $serialNumber: String, $residualValue: Decimal, $usefulLifeMonths: Int
+  ) {
+    updateFixedAsset(
+      id: $id, assetName: $assetName, description: $description, location: $location,
+      serialNumber: $serialNumber, residualValue: $residualValue, usefulLifeMonths: $usefulLifeMonths
+    ) {
+      id assetCode assetName description category acquisitionDate acquisitionCost
+      usefulLifeMonths residualValue depreciationMethod depreciationRate
+      accumulatedDepreciation netBookValue location serialNumber supplier
+      warrantyExpiry status branch { id branchName } createdAt
+    }
+  }
+`;
+
+export const RUN_DEPRECIATION = gql`
+  mutation RunDepreciation($periodDate: Date!) {
+    runDepreciation(periodDate: $periodDate)
+  }
+`;
+
+export const DISPOSE_FIXED_ASSET = gql`
+  mutation DisposeFixedAsset($id: ID!, $disposalAmount: Decimal!, $reason: String) {
+    disposeFixedAsset(id: $id, disposalAmount: $disposalAmount, reason: $reason) {
+      id assetCode assetName status disposalDate disposalAmount netBookValue
+    }
+  }
+`;
+
+// Budget
+export const GET_BUDGETS = gql`
+  query GetBudgets {
+    budgets {
+      id budgetName fiscalYear startDate endDate status approvedBy approvedAt
+      branch { id branchName }
+      notes createdBy createdAt
+    }
+  }
+`;
+
+export const GET_BUDGET_LINES = gql`
+  query GetBudgetLines($budgetId: ID!) {
+    budgetLines(budgetId: $budgetId) {
+      id
+      account { id accountCode accountName }
+      periodMonth budgetedAmount notes
+    }
+  }
+`;
+
+export const GET_BUDGET_VS_ACTUAL = gql`
+  query GetBudgetVsActual($budgetId: ID!) {
+    budgetVsActual(budgetId: $budgetId)
+  }
+`;
+
+export const CREATE_BUDGET = gql`
+  mutation CreateBudget($budgetName: String!, $fiscalYear: Int!, $startDate: Date!, $endDate: Date!, $branchId: ID, $notes: String) {
+    createBudget(budgetName: $budgetName, fiscalYear: $fiscalYear, startDate: $startDate, endDate: $endDate, branchId: $branchId, notes: $notes) {
+      id budgetName fiscalYear startDate endDate status notes createdBy createdAt
+    }
+  }
+`;
+
+export const ADD_BUDGET_LINE = gql`
+  mutation AddBudgetLine($budgetId: ID!, $accountId: ID!, $periodMonth: Int!, $amount: Decimal!, $notes: String) {
+    addBudgetLine(budgetId: $budgetId, accountId: $accountId, periodMonth: $periodMonth, amount: $amount, notes: $notes) {
+      id account { id accountCode accountName } periodMonth budgetedAmount notes
+    }
+  }
+`;
+
+export const UPDATE_BUDGET_LINE = gql`
+  mutation UpdateBudgetLine($lineId: ID!, $amount: Decimal!, $notes: String) {
+    updateBudgetLine(lineId: $lineId, amount: $amount, notes: $notes) {
+      id account { id accountCode accountName } periodMonth budgetedAmount notes
+    }
+  }
+`;
+
+export const APPROVE_BUDGET = gql`
+  mutation ApproveBudget($id: ID!) {
+    approveBudget(id: $id) {
+      id status approvedBy approvedAt
+    }
+  }
+`;
+
+export const ACTIVATE_BUDGET = gql`
+  mutation ActivateBudget($id: ID!) {
+    activateBudget(id: $id) {
+      id status
+    }
+  }
+`;
+
+export const CLOSE_BUDGET = gql`
+  mutation CloseBudget($id: ID!) {
+    closeBudget(id: $id) {
+      id status
+    }
+  }
+`;
+
+// Cost Centers
+export const GET_COST_CENTERS = gql`
+  query GetCostCenters {
+    costCenters {
+      id centerCode centerName description centerType
+      parentCenter { id centerName }
+      branch { id branchName }
+      managerName isActive createdAt
+    }
+  }
+`;
+
+export const GET_COST_CENTER_REPORT = gql`
+  query GetCostCenterReport($startDate: Date!, $endDate: Date!) {
+    costCenterReport(startDate: $startDate, endDate: $endDate)
+  }
+`;
+
+export const CREATE_COST_CENTER = gql`
+  mutation CreateCostCenter(
+    $centerCode: String!, $centerName: String!, $description: String,
+    $centerType: String!, $parentCenterId: ID, $branchId: ID, $managerName: String
+  ) {
+    createCostCenter(
+      centerCode: $centerCode, centerName: $centerName, description: $description,
+      centerType: $centerType, parentCenterId: $parentCenterId, branchId: $branchId,
+      managerName: $managerName
+    ) {
+      id centerCode centerName description centerType
+      parentCenter { id centerName }
+      branch { id branchName }
+      managerName isActive createdAt
+    }
+  }
+`;
+
+export const UPDATE_COST_CENTER = gql`
+  mutation UpdateCostCenter($id: ID!, $centerName: String, $description: String, $managerName: String, $isActive: Boolean) {
+    updateCostCenter(id: $id, centerName: $centerName, description: $description, managerName: $managerName, isActive: $isActive) {
+      id centerCode centerName description centerType
+      parentCenter { id centerName }
+      branch { id branchName }
+      managerName isActive createdAt
+    }
+  }
+`;
+
+// Joint Account Holders
+export const GET_JOINT_HOLDERS = gql`
+  query GetJointAccountHolders($accountId: ID!) {
+    jointAccountHolders(accountId: $accountId) {
+      id
+      savingsAccount { id accountNumber }
+      member { id memberNumber fullName }
+      relationship canTransact canClose addedDate isActive
+    }
+  }
+`;
+
+export const ADD_JOINT_HOLDER = gql`
+  mutation AddJointHolder($accountId: ID!, $memberId: ID!, $relationship: String!, $canTransact: Boolean!, $canClose: Boolean!) {
+    addJointHolder(accountId: $accountId, memberId: $memberId, relationship: $relationship, canTransact: $canTransact, canClose: $canClose) {
+      id
+      savingsAccount { id accountNumber }
+      member { id memberNumber fullName }
+      relationship canTransact canClose addedDate isActive
+    }
+  }
+`;
+
+export const REMOVE_JOINT_HOLDER = gql`
+  mutation RemoveJointHolder($holderId: ID!) {
+    removeJointHolder(holderId: $holderId)
   }
 `;
