@@ -149,7 +149,12 @@ function makeClient() {
               },
             },
             searchMembers: paginatedMerge,
-            loanAccounts: paginatedMerge,
+            loanAccounts: {
+              keyArgs: ["status"],
+              merge(_existing: any, incoming: any) {
+                return incoming;
+              },
+            },
             loanRepaymentSchedule: paginatedMerge,
             auditLogs: paginatedMerge,
             paymentRequests: paginatedMerge,

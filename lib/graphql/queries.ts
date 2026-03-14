@@ -3532,3 +3532,118 @@ export const REMOVE_JOINT_HOLDER = gql`
     removeJointHolder(holderId: $holderId)
   }
 `;
+
+// ALM Reports
+export const GET_ALM_REPORT = gql`
+  query GetALMReport($date: Date!, $branchId: ID) {
+    almReport(date: $date, branchId: $branchId) {
+      reportDate
+      loanMaturity { bucket count amount }
+      depositMaturity { bucket count amount }
+      gapAnalysis { bucket loanAmount depositAmount gap cumulativeGap }
+      totalLoans totalDeposits netGap
+    }
+  }
+`;
+
+// Loan Insurance
+export const GET_LOAN_INSURANCE_POLICIES = gql`
+  query GetLoanInsurancePolicies($loanId: ID!) {
+    loanInsurancePolicies(loanId: $loanId) {
+      id policyNumber premiumAmount maxInsuredAmount
+      coverageStartDate coverageEndDate status
+      claimStatus claimAmount claimDate claimReason
+      claimProcessedDate claimProcessedBy
+      createdAt
+    }
+  }
+`;
+
+export const CALCULATE_INSURANCE_PREMIUM = gql`
+  query CalculateInsurancePremium($loanId: ID!) {
+    calculateInsurancePremium(loanId: $loanId)
+  }
+`;
+
+export const CREATE_LOAN_INSURANCE_POLICY = gql`
+  mutation CreateLoanInsurancePolicy($loanId: ID!) {
+    createLoanInsurancePolicy(loanId: $loanId) {
+      id policyNumber premiumAmount maxInsuredAmount
+      coverageStartDate coverageEndDate status
+    }
+  }
+`;
+
+export const SUBMIT_INSURANCE_CLAIM = gql`
+  mutation SubmitInsuranceClaim($policyId: ID!, $claimAmount: Decimal!, $reason: String!) {
+    submitInsuranceClaim(policyId: $policyId, claimAmount: $claimAmount, reason: $reason) {
+      id policyNumber status claimStatus claimAmount claimDate claimReason
+    }
+  }
+`;
+
+export const PROCESS_INSURANCE_CLAIM = gql`
+  mutation ProcessInsuranceClaim($policyId: ID!, $approved: Boolean!, $processedBy: String!) {
+    processInsuranceClaim(policyId: $policyId, approved: $approved, processedBy: $processedBy) {
+      id policyNumber status claimStatus claimProcessedDate claimProcessedBy
+    }
+  }
+`;
+
+// Member Custom Fields
+export const GET_MEMBER_CUSTOM_FIELDS = gql`
+  query GetMemberCustomFields {
+    memberCustomFields {
+      id fieldName fieldLabel fieldType options isRequired sortOrder isActive
+    }
+  }
+`;
+
+export const GET_ALL_MEMBER_CUSTOM_FIELDS = gql`
+  query GetAllMemberCustomFields {
+    allMemberCustomFields {
+      id fieldName fieldLabel fieldType options isRequired sortOrder isActive createdAt
+    }
+  }
+`;
+
+export const GET_MEMBER_CUSTOM_FIELD_VALUES = gql`
+  query GetMemberCustomFieldValues($memberId: ID!) {
+    memberCustomFieldValues(memberId: $memberId) {
+      id
+      field { id fieldName fieldLabel fieldType options isRequired }
+      fieldValue
+    }
+  }
+`;
+
+export const CREATE_MEMBER_CUSTOM_FIELD = gql`
+  mutation CreateMemberCustomField($fieldName: String!, $fieldLabel: String!, $fieldType: CustomFieldType, $options: String, $isRequired: Boolean, $sortOrder: Int) {
+    createMemberCustomField(fieldName: $fieldName, fieldLabel: $fieldLabel, fieldType: $fieldType, options: $options, isRequired: $isRequired, sortOrder: $sortOrder) {
+      id fieldName fieldLabel fieldType options isRequired sortOrder isActive
+    }
+  }
+`;
+
+export const UPDATE_MEMBER_CUSTOM_FIELD = gql`
+  mutation UpdateMemberCustomField($id: ID!, $fieldLabel: String, $options: String, $isRequired: Boolean, $sortOrder: Int, $isActive: Boolean) {
+    updateMemberCustomField(id: $id, fieldLabel: $fieldLabel, options: $options, isRequired: $isRequired, sortOrder: $sortOrder, isActive: $isActive) {
+      id fieldName fieldLabel fieldType options isRequired sortOrder isActive
+    }
+  }
+`;
+
+export const DELETE_MEMBER_CUSTOM_FIELD = gql`
+  mutation DeleteMemberCustomField($id: ID!) {
+    deleteMemberCustomField(id: $id)
+  }
+`;
+
+export const SET_MEMBER_CUSTOM_FIELD_VALUE = gql`
+  mutation SetMemberCustomFieldValue($memberId: ID!, $fieldId: ID!, $value: String!) {
+    setMemberCustomFieldValue(memberId: $memberId, fieldId: $fieldId, value: $value) {
+      id fieldValue
+      field { id fieldName fieldLabel }
+    }
+  }
+`;

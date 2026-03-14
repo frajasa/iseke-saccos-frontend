@@ -1891,3 +1891,65 @@ export interface JointAccountHolder {
   addedDate: string;
   isActive: boolean;
 }
+
+// ALM Reports
+export interface MaturityBucket {
+  bucket: string;
+  count: number;
+  amount: number;
+}
+
+export interface ALMGap {
+  bucket: string;
+  loanAmount: number;
+  depositAmount: number;
+  gap: number;
+  cumulativeGap: number;
+}
+
+export interface ALMReport {
+  reportDate: string;
+  loanMaturity: MaturityBucket[];
+  depositMaturity: MaturityBucket[];
+  gapAnalysis: ALMGap[];
+  totalLoans: number;
+  totalDeposits: number;
+  netGap: number;
+}
+
+// Loan Insurance
+export interface LoanInsurancePolicy {
+  id: string;
+  policyNumber: string;
+  premiumAmount: number;
+  maxInsuredAmount: number;
+  coverageStartDate: string;
+  coverageEndDate: string;
+  status: string;
+  claimStatus?: string | null;
+  claimAmount?: number | null;
+  claimDate?: string | null;
+  claimReason?: string | null;
+  claimProcessedDate?: string | null;
+  claimProcessedBy?: string | null;
+  createdAt: string;
+}
+
+// Member Custom Fields
+export interface MemberCustomField {
+  id: string;
+  fieldName: string;
+  fieldLabel: string;
+  fieldType: string;
+  options?: string | null;
+  isRequired: boolean;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt?: string;
+}
+
+export interface MemberCustomFieldValue {
+  id: string;
+  field: MemberCustomField;
+  fieldValue?: string | null;
+}

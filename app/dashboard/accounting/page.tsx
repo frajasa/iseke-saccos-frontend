@@ -126,6 +126,13 @@ const accountingModules = [
     icon: Lock,
     color: "bg-gray-600",
   },
+  {
+    name: "ALM Report",
+    description: "Asset-Liability Management maturity schedules and gap analysis",
+    href: "/dashboard/accounting/alm-report",
+    icon: BarChart3,
+    color: "bg-teal-600",
+  },
 ];
 
 export default function AccountingDashboard() {

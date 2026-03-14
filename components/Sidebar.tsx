@@ -43,7 +43,7 @@ import {
   GitBranch,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Shield, Package, PieChart, Target, UserPlus } from "lucide-react";
+import { Shield, Package, PieChart, Target, UserPlus, BarChart3, ShieldPlus, FormInput } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 // Each nav item requires at least one of the listed permissions to be visible
@@ -94,6 +94,9 @@ const navigation = [
       { name: "Budgets", href: "/dashboard/budgets", icon: PieChart, permissions: ["BUDGET_VIEW"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
       { name: "Cost Centers", href: "/dashboard/cost-centers", icon: Target, permissions: ["COST_CENTER_VIEW"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
       { name: "Joint Accounts", href: "/dashboard/joint-accounts", icon: UserPlus, permissions: [], roles: ["ADMIN", "MANAGER", "CASHIER"] },
+      { name: "ALM Report", href: "/dashboard/accounting/alm-report", icon: BarChart3, permissions: ["VIEW_ACCOUNTING"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
+      { name: "Loan Insurance", href: "/dashboard/loan-insurance", icon: ShieldPlus, permissions: ["VIEW_LOANS", "MANAGE_LOANS"], roles: ["ADMIN", "MANAGER", "LOAN_OFFICER"] },
+      { name: "Custom Fields", href: "/dashboard/custom-fields", icon: FormInput, permissions: ["VIEW_MEMBERS", "MANAGE_MEMBERS"], roles: ["ADMIN", "MANAGER"] },
       { name: "Settings", href: "/dashboard/settings", icon: Settings, permissions: ["MANAGE_SETTINGS"], roles: ["ADMIN"] },
       { name: "Change Password", href: "/dashboard/change-password", icon: Lock, permissions: [], roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER", "ACCOUNTANT"] },
     ],
