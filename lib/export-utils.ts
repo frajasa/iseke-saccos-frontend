@@ -98,7 +98,6 @@ export async function exportToExcel(options: ExportOptions) {
   wsData.push([]); // blank row
 
   // Column headers
-  const headerRowIndex = wsData.length;
   wsData.push(columns.map((c) => c.header));
 
   // Data rows

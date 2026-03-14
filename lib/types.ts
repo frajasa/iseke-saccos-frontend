@@ -1874,7 +1874,7 @@ export interface CostCenter {
   description?: string;
   centerType: string;
   parentCenter?: { id: string; centerName: string } | null;
-  branch?: { id: string; name: string } | null;
+  branch?: { id: string; branchName: string } | null;
   managerName?: string;
   isActive: boolean;
   createdAt: string;
