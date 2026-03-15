@@ -40,9 +40,10 @@ function LoginContent() {
   // Redirect if already authenticated
   useEffect(() => {
     if (status === "authenticated") {
-      router.push("/dashboard");
+      const user = session?.user as any;
+      router.push(user?.role === "MEMBER" ? "/member" : "/dashboard");
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -84,7 +85,7 @@ function LoginContent() {
           setError(result.error);
         }
       } else if (result?.ok) {
-        router.push("/dashboard");
+        router.push("/");
       }
     } catch (err) {
       setError((err as Error).message || "Login failed. Please check your credentials.");
@@ -274,7 +275,7 @@ function LoginContent() {
                           redirect: false,
                         });
                         if (result?.ok) {
-                          router.push("/dashboard");
+                          router.push("/");
                         }
                       } catch (err: any) {
                         setPasswordChangeError(err.message || "Failed to change password");

@@ -18,6 +18,7 @@ import {
   User,
   Calculator,
   ShieldCheck,
+  Lock,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -45,6 +46,12 @@ const navigation = [
       { name: "My Requests", href: "/member/requests", icon: FileText },
       { name: "My Guarantees", href: "/member/guarantees", icon: ShieldCheck },
       { name: "Loan Calculator", href: "/member/loan-calculator", icon: Calculator },
+    ],
+  },
+  {
+    label: "ACCOUNT",
+    items: [
+      { name: "Change Password", href: "/member/change-password", icon: Lock },
     ],
   },
 ];

@@ -11,12 +11,13 @@ export default function Home() {
   useEffect(() => {
     if (status !== "loading") {
       if (status === "authenticated") {
-        router.push("/dashboard");
+        const user = session?.user as any;
+        router.push(user?.role === "MEMBER" ? "/member" : "/dashboard");
       } else {
         router.push("/login");
       }
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
