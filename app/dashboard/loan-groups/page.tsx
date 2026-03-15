@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useLazyQuery, useMutation } from "@apollo/client";
 import {
   GET_LOAN_GROUPS,
+  GET_LOAN_GROUP_MEMBERS,
   CREATE_LOAN_GROUP,
   UPDATE_LOAN_GROUP,
   ADD_LOAN_GROUP_MEMBER,
@@ -37,6 +38,20 @@ interface GroupMemberData {
   roleInGroup?: string;
   joinDate: string;
   isActive: boolean;
+}
+
+interface FetchedGroupMember {
+  id: string;
+  member: {
+    id: string;
+    memberNumber: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber?: string;
+  };
+  liabilityShare?: number;
+  roleInGroup?: string;
+  joinedAt?: string;
 }
 
 interface LoanGroupData {
@@ -88,6 +103,11 @@ export default function LoanGroupsPage() {
   // Queries
   const { data, loading, error, refetch } = useQuery(GET_LOAN_GROUPS);
 
+  const [fetchGroupMembers, { data: groupMembersData, loading: groupMembersLoading }] = useLazyQuery(
+    GET_LOAN_GROUP_MEMBERS,
+    { fetchPolicy: "network-only" }
+  );
+
   const [searchMembers, { data: membersData, loading: membersLoading }] = useLazyQuery(GET_MEMBERS, {
     fetchPolicy: "network-only",
   });
@@ -121,6 +141,9 @@ export default function LoanGroupsPage() {
     onCompleted: () => {
       toast.success("Member added to group");
       refetch();
+      if (expandedGroupId) {
+        fetchGroupMembers({ variables: { groupId: expandedGroupId } });
+      }
       setShowAddMemberModal(null);
       setNewMember({ memberId: "", liabilityShare: "", roleInGroup: "MEMBER" });
       setMemberSearch("");
@@ -132,6 +155,9 @@ export default function LoanGroupsPage() {
     onCompleted: () => {
       toast.success("Member removed from group");
       refetch();
+      if (expandedGroupId) {
+        fetchGroupMembers({ variables: { groupId: expandedGroupId } });
+      }
     },
     onError: (err) => toast.error(err.message),
   });
@@ -140,7 +166,12 @@ export default function LoanGroupsPage() {
   const searchResults = membersData?.members?.content || [];
 
   const toggleExpand = (groupId: string) => {
-    setExpandedGroupId(expandedGroupId === groupId ? null : groupId);
+    if (expandedGroupId === groupId) {
+      setExpandedGroupId(null);
+    } else {
+      setExpandedGroupId(groupId);
+      fetchGroupMembers({ variables: { groupId } });
+    }
   };
 
   const handleCreate = () => {
@@ -319,6 +350,14 @@ export default function LoanGroupsPage() {
                     key={group.id}
                     group={group}
                     isExpanded={expandedGroupId === group.id}
+                    fetchedMembers={
+                      expandedGroupId === group.id
+                        ? groupMembersData?.loanGroupMembers
+                        : undefined
+                    }
+                    fetchedMembersLoading={
+                      expandedGroupId === group.id ? groupMembersLoading : false
+                    }
                     onToggleExpand={() => toggleExpand(group.id)}
                     onToggleActive={() => handleToggleActive(group)}
                     onAddMember={() => {
@@ -579,6 +618,8 @@ export default function LoanGroupsPage() {
 function GroupRow({
   group,
   isExpanded,
+  fetchedMembers,
+  fetchedMembersLoading,
   onToggleExpand,
   onToggleActive,
   onAddMember,
@@ -586,12 +627,14 @@ function GroupRow({
 }: {
   group: LoanGroupData;
   isExpanded: boolean;
+  fetchedMembers?: FetchedGroupMember[];
+  fetchedMembersLoading: boolean;
   onToggleExpand: () => void;
   onToggleActive: () => void;
   onAddMember: () => void;
   onRemoveMember: (memberId: string, memberName: string) => void;
 }) {
-  const memberCount = group.members?.length || 0;
+  const memberCount = fetchedMembers?.length ?? group.members?.length ?? 0;
 
   const loanTypeLabel =
     GROUP_LOAN_TYPES.find((t) => t.value === group.groupLoanType)?.label || group.groupLoanType;
@@ -691,7 +734,11 @@ function GroupRow({
                 <p className="text-xs text-muted-foreground">{group.description}</p>
               )}
 
-              {memberCount === 0 ? (
+              {fetchedMembersLoading ? (
+                <div className="text-center py-6 text-sm text-muted-foreground animate-pulse">
+                  Loading group members...
+                </div>
+              ) : memberCount === 0 ? (
                 <div className="text-center py-4 text-sm text-muted-foreground">
                   No members in this group yet. Add members to get started.
                 </div>
@@ -707,6 +754,9 @@ function GroupRow({
                           Member No.
                         </th>
                         <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
+                          Phone
+                        </th>
+                        <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
                           Role
                         </th>
                         <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
@@ -716,15 +766,12 @@ function GroupRow({
                           Joined
                         </th>
                         <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
-                          Status
-                        </th>
-                        <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground uppercase">
                           Actions
                         </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {group.members!.map((m) => {
+                      {(fetchedMembers || group.members || []).map((m: FetchedGroupMember | GroupMemberData) => {
                         const memberName = `${m.member.firstName} ${m.member.lastName}`;
                         const roleLabel =
                           ROLE_OPTIONS.find((r) => r.value === m.roleInGroup)?.label ||
@@ -738,6 +785,8 @@ function GroupRow({
                             : m.roleInGroup === "TREASURER"
                             ? "bg-purple-100 text-purple-700"
                             : "bg-gray-100 text-gray-700";
+                        const joinDateValue = "joinedAt" in m ? m.joinedAt : (m as GroupMemberData).joinDate;
+                        const phoneNumber = "phoneNumber" in m.member ? m.member.phoneNumber : undefined;
 
                         return (
                           <tr
@@ -747,6 +796,9 @@ function GroupRow({
                             <td className="px-4 py-2 text-sm font-medium">{memberName}</td>
                             <td className="px-4 py-2 font-mono text-xs">
                               {m.member.memberNumber}
+                            </td>
+                            <td className="px-4 py-2 text-sm text-muted-foreground">
+                              {phoneNumber || "-"}
                             </td>
                             <td className="px-4 py-2">
                               <span
@@ -758,17 +810,8 @@ function GroupRow({
                             <td className="px-4 py-2 text-sm">
                               {m.liabilityShare != null ? `${m.liabilityShare}%` : "-"}
                             </td>
-                            <td className="px-4 py-2 text-xs">{formatDate(m.joinDate)}</td>
-                            <td className="px-4 py-2">
-                              <span
-                                className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                  m.isActive
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-red-100 text-red-700"
-                                }`}
-                              >
-                                {m.isActive ? "Active" : "Inactive"}
-                              </span>
+                            <td className="px-4 py-2 text-xs">
+                              {joinDateValue ? formatDate(joinDateValue) : "-"}
                             </td>
                             <td className="px-4 py-2">
                               <button

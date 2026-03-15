@@ -1,21 +1,33 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@apollo/client/react";
-import { GET_PAYMENT_DASHBOARD, GET_PAYMENT_REQUESTS } from "@/lib/graphql/queries";
+import { useQuery, useMutation } from "@apollo/client/react";
+import { GET_PAYMENT_DASHBOARD, GET_PAYMENT_REQUESTS, RETRY_EXPIRED_PAYMENTS } from "@/lib/graphql/queries";
 import { formatCurrency, formatDateTime, getStatusColor } from "@/lib/utils";
-import { Smartphone, CheckCircle, XCircle, Clock, ArrowRight, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Smartphone, CheckCircle, XCircle, Clock, ArrowRight, AlertCircle, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import ErrorDisplay from "@/components/ui/ErrorDisplay";
 import { isNullListError } from "@/lib/error-utils";
+import { toast } from "sonner";
 
 const PAGE_SIZE = 10;
 
 export default function PaymentDashboardPage() {
   const [page, setPage] = useState(0);
-  const { data: dashData, loading: dashLoading } = useQuery(GET_PAYMENT_DASHBOARD);
-  const { data: reqData, loading: reqLoading, error: reqError } = useQuery(GET_PAYMENT_REQUESTS, {
+  const { data: dashData, loading: dashLoading, refetch: refetchDash } = useQuery(GET_PAYMENT_DASHBOARD);
+  const { data: reqData, loading: reqLoading, error: reqError, refetch: refetchReqs } = useQuery(GET_PAYMENT_REQUESTS, {
     variables: { page, size: PAGE_SIZE },
+  });
+
+  const [retryExpired, { loading: retrying }] = useMutation(RETRY_EXPIRED_PAYMENTS, {
+    onCompleted: (data) => {
+      toast.success(`Successfully retried ${data.retryExpiredPayments} expired payment(s)`);
+      refetchDash();
+      refetchReqs();
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to retry expired payments");
+    },
   });
 
   const dashboard = dashData?.paymentDashboard;
@@ -39,13 +51,23 @@ export default function PaymentDashboardPage() {
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Payment Gateway</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Mobile money & bank payment integrations</p>
         </div>
-        <Link
-          href="/dashboard/payments/requests"
-          className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-primary-foreground font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm text-sm"
-        >
-          View All Requests
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => retryExpired()}
+            disabled={retrying}
+            className="inline-flex items-center gap-2 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border border-amber-500/20 rounded-lg px-4 py-2.5 font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RefreshCw className={`w-4 h-4 ${retrying ? "animate-spin" : ""}`} />
+            {retrying ? "Retrying..." : "Retry Expired Payments"}
+          </button>
+          <Link
+            href="/dashboard/payments/requests"
+            className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-primary-foreground font-medium px-4 py-2.5 rounded-lg transition-colors shadow-sm text-sm"
+          >
+            View All Requests
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
 
       {/* Stats Cards */}

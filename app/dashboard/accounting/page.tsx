@@ -133,6 +133,13 @@ const accountingModules = [
     icon: BarChart3,
     color: "bg-teal-600",
   },
+  {
+    name: "TCDC Compliance",
+    description: "Regulatory compliance report for TCDC requirements",
+    href: "/dashboard/accounting/tcdc-compliance",
+    icon: ShieldAlert,
+    color: "bg-red-600",
+  },
 ];
 
 export default function AccountingDashboard() {

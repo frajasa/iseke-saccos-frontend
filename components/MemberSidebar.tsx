@@ -17,6 +17,7 @@ import {
   PiggyBank,
   User,
   Calculator,
+  ShieldCheck,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -42,6 +43,7 @@ const navigation = [
       { name: "Apply for Loan", href: "/member/apply-loan", icon: CreditCard },
       { name: "Request Withdrawal", href: "/member/withdraw", icon: Wallet },
       { name: "My Requests", href: "/member/requests", icon: FileText },
+      { name: "My Guarantees", href: "/member/guarantees", icon: ShieldCheck },
       { name: "Loan Calculator", href: "/member/loan-calculator", icon: Calculator },
     ],
   },

@@ -117,17 +117,34 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Welcome Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary-hover rounded-2xl p-6 lg:p-8 text-white">
-        <div className="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute right-20 bottom-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2" />
-        <div className="relative">
-          <p className="text-white/70 text-sm font-medium mb-1">{getTimeGreeting()}</p>
-          <h1 className="text-2xl lg:text-3xl font-bold mb-2">
-            {user?.firstName || user?.name?.split(" ")[0]}
-          </h1>
-          <p className="text-white/80 text-sm max-w-lg">
-            Here&apos;s an overview of your SACCOS performance today.
-          </p>
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-success/80 rounded-2xl p-6 lg:p-8 text-white">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cuc3ZnLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48ZyBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMDUiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHptMCAzMmMtNy43MzIgMC0xNC02LjI2OC0xNC0xNHM2LjI2OC0xNCAxNC0xNCAxNCA2LjI2OCAxNCAxNC02LjI2OCAxNC0xNCAxNHoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30" />
+        <div className="absolute right-0 top-0 w-72 h-72 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3 blur-sm" />
+        <div className="absolute left-1/2 bottom-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 blur-sm" />
+        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <p className="text-white/70 text-sm font-medium mb-1">{getTimeGreeting()}</p>
+            <h1 className="text-2xl lg:text-3xl font-bold mb-2">
+              {user?.firstName || user?.name?.split(" ")[0]}
+            </h1>
+            <p className="text-white/80 text-sm max-w-lg">
+              Here&apos;s an overview of your SACCOS performance today.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/members/new" className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-lg text-sm font-medium text-white transition-all border border-white/10">
+              <Users className="w-3.5 h-3.5" />
+              Add Member
+            </Link>
+            <Link href="/savings" className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-lg text-sm font-medium text-white transition-all border border-white/10">
+              <Wallet className="w-3.5 h-3.5" />
+              New Deposit
+            </Link>
+            <Link href="/loans" className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm rounded-lg text-sm font-medium text-white transition-all border border-white/10">
+              <CreditCard className="w-3.5 h-3.5" />
+              Loans
+            </Link>
+          </div>
         </div>
       </div>
 

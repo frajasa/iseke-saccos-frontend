@@ -34,7 +34,19 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-background">
       <Sidebar />
       <main className="lg:pl-[var(--sidebar-width,256px)] transition-all duration-200">
-        <div className="p-4 lg:p-8 pt-20 lg:pt-8 max-w-[1600px] mx-auto">
+        <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-md border-b border-border px-4 lg:px-8 py-3 no-print">
+          <div className="flex items-center justify-between max-w-[1600px] mx-auto">
+            <div className="lg:hidden w-10" />
+            <div className="flex-1" />
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                <span>Online</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="p-4 lg:p-8 max-w-[1600px] mx-auto">
           {children}
         </div>
       </main>

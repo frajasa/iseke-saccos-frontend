@@ -3647,3 +3647,342 @@ export const SET_MEMBER_CUSTOM_FIELD_VALUE = gql`
     }
   }
 `;
+
+// ===== Petty Cash =====
+export const GET_PETTY_CASH_ACCOUNTS = gql`
+  query GetPettyCashAccounts {
+    pettyCashAccounts {
+      id accountName authorizedAmount currentBalance custodian isActive
+      branch { id branchName }
+      glAccount { id accountName accountNumber }
+      createdAt updatedAt
+    }
+  }
+`;
+
+export const GET_PETTY_CASH_ACCOUNT = gql`
+  query GetPettyCashAccount($id: ID!) {
+    pettyCashAccount(id: $id) {
+      id accountName authorizedAmount currentBalance custodian isActive
+      branch { id branchName }
+      glAccount { id accountName accountNumber }
+      createdAt updatedAt
+    }
+  }
+`;
+
+export const GET_PETTY_CASH_TRANSACTIONS = gql`
+  query GetPettyCashTransactions($accountId: ID!) {
+    pettyCashTransactions(accountId: $accountId) {
+      id transactionDate transactionType amount balanceAfter description
+      receiptNumber category approvedBy processedBy createdAt
+      pettyCashAccount { id accountName }
+    }
+  }
+`;
+
+export const CREATE_PETTY_CASH_ACCOUNT = gql`
+  mutation CreatePettyCashAccount($accountName: String!, $authorizedAmount: Decimal!, $custodian: String!, $branchId: ID!, $glAccountId: ID!) {
+    createPettyCashAccount(accountName: $accountName, authorizedAmount: $authorizedAmount, custodian: $custodian, branchId: $branchId, glAccountId: $glAccountId) {
+      id accountName authorizedAmount currentBalance custodian isActive
+    }
+  }
+`;
+
+export const FUND_PETTY_CASH = gql`
+  mutation FundPettyCash($accountId: ID!, $amount: Decimal!, $description: String!) {
+    fundPettyCash(accountId: $accountId, amount: $amount, description: $description) {
+      id transactionType amount balanceAfter description createdAt
+    }
+  }
+`;
+
+export const SPEND_PETTY_CASH = gql`
+  mutation SpendPettyCash($accountId: ID!, $amount: Decimal!, $description: String!, $receiptNumber: String, $category: String) {
+    spendPettyCash(accountId: $accountId, amount: $amount, description: $description, receiptNumber: $receiptNumber, category: $category) {
+      id transactionType amount balanceAfter description receiptNumber category createdAt
+    }
+  }
+`;
+
+export const REPLENISH_PETTY_CASH = gql`
+  mutation ReplenishPettyCash($accountId: ID!, $description: String!) {
+    replenishPettyCash(accountId: $accountId, description: $description) {
+      id transactionType amount balanceAfter description createdAt
+    }
+  }
+`;
+
+// ===== Board Members =====
+export const GET_BOARD_MEMBERS = gql`
+  query GetBoardMembers {
+    boardMembers {
+      id fullName position committee appointmentDate expiryDate
+      phoneNumber email nationalId isActive notes createdAt updatedAt
+      member { id memberNumber firstName lastName }
+    }
+  }
+`;
+
+export const GET_BOARD_MEMBERS_BY_COMMITTEE = gql`
+  query GetBoardMembersByCommittee($committee: String!) {
+    boardMembersByCommittee(committee: $committee) {
+      id fullName position committee appointmentDate expiryDate
+      phoneNumber email nationalId isActive notes
+      member { id memberNumber firstName lastName }
+    }
+  }
+`;
+
+export const GET_BOARD_MEMBER = gql`
+  query GetBoardMember($id: ID!) {
+    boardMember(id: $id) {
+      id fullName position committee appointmentDate expiryDate
+      phoneNumber email nationalId isActive notes createdAt updatedAt
+      member { id memberNumber firstName lastName }
+    }
+  }
+`;
+
+export const CREATE_BOARD_MEMBER = gql`
+  mutation CreateBoardMember($fullName: String!, $position: String!, $committee: String, $appointmentDate: Date!, $expiryDate: Date, $phoneNumber: String, $email: String, $nationalId: String, $memberId: ID, $notes: String) {
+    createBoardMember(fullName: $fullName, position: $position, committee: $committee, appointmentDate: $appointmentDate, expiryDate: $expiryDate, phoneNumber: $phoneNumber, email: $email, nationalId: $nationalId, memberId: $memberId, notes: $notes) {
+      id fullName position committee appointmentDate expiryDate isActive
+    }
+  }
+`;
+
+export const UPDATE_BOARD_MEMBER = gql`
+  mutation UpdateBoardMember($id: ID!, $fullName: String, $position: String, $committee: String, $expiryDate: Date, $phoneNumber: String, $email: String, $isActive: Boolean, $notes: String) {
+    updateBoardMember(id: $id, fullName: $fullName, position: $position, committee: $committee, expiryDate: $expiryDate, phoneNumber: $phoneNumber, email: $email, isActive: $isActive, notes: $notes) {
+      id fullName position committee expiryDate phoneNumber email isActive notes
+    }
+  }
+`;
+
+// ===== TCDC Compliance =====
+export const GET_TCDC_COMPLIANCE_REPORT = gql`
+  query GetTCDCComplianceReport($date: Date!, $branchId: ID) {
+    tcdcComplianceReport(date: $date, branchId: $branchId) {
+      reportDate
+      totalAssets totalLiabilities totalEquity totalLoans totalDeposits
+      totalMembers totalBorrowers
+      capitalAdequacy {
+        coreCapital riskWeightedAssets capitalAdequacyRatio minimumRequired compliant
+      }
+      liquidityRatio {
+        liquidAssets shortTermLiabilities liquidityRatio minimumRequired compliant
+      }
+      sectorConcentration {
+        sector loanCount totalExposure percentageOfPortfolio
+      }
+      insiderLending {
+        memberName position loanAmount outstandingBalance percentageOfCoreCapital
+      }
+    }
+  }
+`;
+
+// ===== Credit Scoring =====
+export const GET_CREDIT_SCORE = gql`
+  query GetCreditScore($memberId: ID!) {
+    creditScore(memberId: $memberId) {
+      id score rating factors calculatedAt
+      member { id memberNumber firstName lastName }
+    }
+  }
+`;
+
+export const CALCULATE_CREDIT_SCORE = gql`
+  mutation CalculateCreditScore($memberId: ID!) {
+    calculateCreditScore(memberId: $memberId) {
+      id score rating factors calculatedAt
+      member { id memberNumber firstName lastName }
+    }
+  }
+`;
+
+// ===== Dividends (Legacy) =====
+export const GET_DIVIDEND_RUNS = gql`
+  query GetDividendRuns {
+    dividendRuns {
+      id year method rate totalAmount membersPaid distributionMethod
+      profitFigure totalInterestPoints status processedBy createdAt
+    }
+  }
+`;
+
+export const CALCULATE_DIVIDENDS = gql`
+  mutation CalculateDividends($year: Int!, $method: String!, $rate: Decimal!) {
+    calculateDividends(year: $year, method: $method, rate: $rate) {
+      id year method rate totalAmount membersPaid status
+    }
+  }
+`;
+
+export const POST_DIVIDENDS = gql`
+  mutation PostDividends($dividendRunId: ID!) {
+    postDividends(dividendRunId: $dividendRunId) {
+      id status totalAmount membersPaid
+    }
+  }
+`;
+
+// ===== Two-Factor Authentication =====
+export const SETUP_2FA = gql`
+  mutation Setup2FA {
+    setup2FA {
+      secret
+      otpAuthUri
+    }
+  }
+`;
+
+export const VERIFY_2FA = gql`
+  mutation Verify2FA($code: String!) {
+    verify2FA(code: $code)
+  }
+`;
+
+export const DISABLE_2FA = gql`
+  mutation Disable2FA {
+    disable2FA
+  }
+`;
+
+// ===== Guarantor Consent =====
+// NOTE: There is no dedicated backend query for fetching a member's guarantee requests.
+// A dedicated endpoint (e.g., essGuaranteeRequests) should be added to the backend.
+// For now, this query uses essLoanAccounts which includes guarantor data on each loan.
+export const GET_MY_GUARANTEE_REQUESTS = gql`
+  query GetMyGuaranteeRequests {
+    essLoanAccounts {
+      id
+      loanNumber
+      principalAmount
+      purpose
+      status
+      member {
+        id
+        firstName
+        lastName
+        memberNumber
+      }
+      guarantors {
+        id
+        guarantorName
+        guarantorPhone
+        guarantorNationalId
+        guaranteedAmount
+        relationship
+        status
+        consentDate
+        consentNotes
+        createdAt
+        guarantorMember {
+          id
+        }
+      }
+    }
+  }
+`;
+
+export const ACCEPT_GUARANTEE = gql`
+  mutation AcceptGuarantee($guarantorId: ID!, $notes: String) {
+    acceptGuarantee(guarantorId: $guarantorId, notes: $notes) {
+      id status consentGiven consentDate
+    }
+  }
+`;
+
+export const DECLINE_GUARANTEE = gql`
+  mutation DeclineGuarantee($guarantorId: ID!, $reason: String) {
+    declineGuarantee(guarantorId: $guarantorId, reason: $reason) {
+      id status consentGiven
+    }
+  }
+`;
+
+// ===== Share Netting =====
+export const NET_SHARES_AND_DEPOSITS = gql`
+  mutation NetSharesAndDeposits($loanId: ID!) {
+    netSharesAndDeposits(loanId: $loanId) {
+      id loanNumber outstandingBalance status
+    }
+  }
+`;
+
+// ===== Retry Expired Payments =====
+export const RETRY_EXPIRED_PAYMENTS = gql`
+  mutation RetryExpiredPayments {
+    retryExpiredPayments
+  }
+`;
+
+// ===== Generate Missing Repayment Schedules =====
+export const GENERATE_MISSING_REPAYMENT_SCHEDULES = gql`
+  mutation GenerateMissingRepaymentSchedules {
+    generateMissingRepaymentSchedules
+  }
+`;
+
+// ===== Send Notification =====
+export const SEND_NOTIFICATION = gql`
+  mutation SendNotification($phoneNumber: String, $email: String, $message: String!, $subject: String) {
+    sendNotification(phoneNumber: $phoneNumber, email: $email, message: $message, subject: $subject)
+  }
+`;
+
+// ===== Loan Group Members =====
+export const GET_LOAN_GROUP_MEMBERS = gql`
+  query GetLoanGroupMembers($groupId: ID!) {
+    loanGroupMembers(groupId: $groupId) {
+      id liabilityShare roleInGroup joinedAt
+      member { id memberNumber firstName lastName phoneNumber }
+    }
+  }
+`;
+
+// ===== Additional filter queries =====
+export const GET_ACTIVE_CURRENCIES = gql`
+  query GetActiveCurrencies {
+    activeCurrencies {
+      id currencyCode currencyName symbol decimalPlaces isActive isBaseCurrency
+    }
+  }
+`;
+
+export const GET_BASE_CURRENCY = gql`
+  query GetBaseCurrency {
+    baseCurrency {
+      id currencyCode currencyName symbol decimalPlaces
+    }
+  }
+`;
+
+export const GET_MEMBER_JOINT_ACCOUNTS = gql`
+  query GetMemberJointAccounts($memberId: ID!) {
+    memberJointAccounts(memberId: $memberId) {
+      id relationship canTransact canClose
+      savingsAccount { id accountNumber balance status }
+      member { id memberNumber firstName lastName }
+    }
+  }
+`;
+
+export const GET_LOAN_MATURITY_SCHEDULE = gql`
+  query GetLoanMaturitySchedule($date: Date!, $branchId: ID) {
+    loanMaturitySchedule(date: $date, branchId: $branchId) {
+      bucket totalAmount count
+    }
+  }
+`;
+
+export const GET_DEPOSIT_MATURITY_SCHEDULE = gql`
+  query GetDepositMaturitySchedule($date: Date!, $branchId: ID) {
+    depositMaturitySchedule(date: $date, branchId: $branchId) {
+      bucket totalAmount count
+    }
+  }
+`;
+

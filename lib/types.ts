@@ -221,7 +221,9 @@ export enum ScheduleStatus {
 }
 
 export enum GuarantorStatus {
+  PENDING_CONSENT = "PENDING_CONSENT",
   ACTIVE = "ACTIVE",
+  DECLINED = "DECLINED",
   RELEASED = "RELEASED",
 }
 
@@ -1952,4 +1954,96 @@ export interface MemberCustomFieldValue {
   id: string;
   field: MemberCustomField;
   fieldValue?: string | null;
+}
+
+// ===== Petty Cash =====
+export interface PettyCashAccount {
+  id: string;
+  accountName: string;
+  authorizedAmount: number;
+  currentBalance: number;
+  custodian: string;
+  isActive: boolean;
+  branch?: { id: string; branchName: string };
+  glAccount?: { id: string; accountName: string; accountNumber: string };
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PettyCashTransaction {
+  id: string;
+  transactionDate: string;
+  transactionType: string;
+  amount: number;
+  balanceAfter?: number;
+  description?: string;
+  receiptNumber?: string;
+  category?: string;
+  approvedBy?: string;
+  processedBy?: string;
+  createdAt?: string;
+  pettyCashAccount?: { id: string; accountName: string };
+}
+
+// ===== Board Members =====
+export interface BoardMember {
+  id: string;
+  fullName: string;
+  position: string;
+  committee?: string;
+  appointmentDate: string;
+  expiryDate?: string;
+  phoneNumber?: string;
+  email?: string;
+  nationalId?: string;
+  isActive: boolean;
+  notes?: string;
+  member?: { id: string; memberNumber: string; firstName: string; lastName: string };
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// ===== TCDC Compliance =====
+export interface TCDCComplianceReport {
+  reportDate: string;
+  totalAssets: number;
+  totalLiabilities: number;
+  totalEquity: number;
+  totalLoans: number;
+  totalDeposits: number;
+  totalMembers: number;
+  totalBorrowers: number;
+  capitalAdequacy: {
+    coreCapital: number;
+    riskWeightedAssets: number;
+    capitalAdequacyRatio: number;
+    minimumRequired: number;
+    compliant: boolean;
+  };
+  liquidityRatio: {
+    liquidAssets: number;
+    shortTermLiabilities: number;
+    liquidityRatio: number;
+    minimumRequired: number;
+    compliant: boolean;
+  };
+  sectorConcentration: {
+    sector: string;
+    loanCount: number;
+    totalExposure: number;
+    percentageOfPortfolio: number;
+  }[];
+  insiderLending: {
+    memberName: string;
+    position: string;
+    loanAmount: number;
+    outstandingBalance: number;
+    percentageOfCoreCapital: number;
+  }[];
+}
+
+// ===== Two-Factor Authentication =====
+export interface TwoFactorSetup {
+  secret: string;
+  otpAuthUri: string;
 }

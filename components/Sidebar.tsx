@@ -43,7 +43,7 @@ import {
   GitBranch,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Shield, Package, PieChart, Target, UserPlus, BarChart3, ShieldPlus, FormInput } from "lucide-react";
+import { Shield, Package, PieChart, Target, UserPlus, BarChart3, ShieldPlus, FormInput, Landmark, Award, Fingerprint } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 // Each nav item requires at least one of the listed permissions to be visible
@@ -97,6 +97,10 @@ const navigation = [
       { name: "ALM Report", href: "/dashboard/accounting/alm-report", icon: BarChart3, permissions: ["VIEW_ACCOUNTING"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT"] },
       { name: "Loan Insurance", href: "/dashboard/loan-insurance", icon: ShieldPlus, permissions: ["VIEW_LOANS", "MANAGE_LOANS"], roles: ["ADMIN", "MANAGER", "LOAN_OFFICER"] },
       { name: "Custom Fields", href: "/dashboard/custom-fields", icon: FormInput, permissions: ["VIEW_MEMBERS", "MANAGE_MEMBERS"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Petty Cash", href: "/dashboard/petty-cash", icon: Coins, permissions: ["VIEW_ACCOUNTING", "MANAGE_ACCOUNTING"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT", "CASHIER"] },
+      { name: "Board Members", href: "/dashboard/board-members", icon: Landmark, permissions: ["MANAGE_SETTINGS"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Credit Scoring", href: "/dashboard/credit-scoring", icon: Award, permissions: ["VIEW_MEMBERS", "VIEW_LOANS"], roles: ["ADMIN", "MANAGER", "LOAN_OFFICER"] },
+      { name: "Security (2FA)", href: "/dashboard/security", icon: Fingerprint, permissions: [], roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER", "ACCOUNTANT"] },
       { name: "Settings", href: "/dashboard/settings", icon: Settings, permissions: ["MANAGE_SETTINGS"], roles: ["ADMIN"] },
       { name: "Change Password", href: "/dashboard/change-password", icon: Lock, permissions: [], roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER", "ACCOUNTANT"] },
     ],
