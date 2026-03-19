@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { GET_LOAN_ACCOUNT, GET_LOAN_REPAYMENT_SCHEDULE, GET_LOAN_TRANSACTIONS, APPROVE_LOAN, DISBURSE_LOAN, ADD_GUARANTOR, ADD_COLLATERAL, WRITE_OFF_LOAN, REFINANCE_LOAN, DEFER_LOAN_PAYMENT, SUSPEND_PENALTY, RESUME_PENALTY, CHANGE_LOAN_INTEREST_RATE, RECALCULATE_LOAN_SCHEDULE } from "@/lib/graphql/queries";
-import { ArrowLeft, DollarSign, Calendar, AlertCircle, ChevronLeft, ChevronRight, Receipt, CheckCircle, Banknote, UserPlus, Shield, Plus } from "lucide-react";
+import { GET_LOAN_ACCOUNT, GET_LOAN_REPAYMENT_SCHEDULE, GET_LOAN_TRANSACTIONS, APPROVE_LOAN, DISBURSE_LOAN, ADD_GUARANTOR, ADD_COLLATERAL, WRITE_OFF_LOAN, REFINANCE_LOAN, DEFER_LOAN_PAYMENT, SUSPEND_PENALTY, RESUME_PENALTY, CHANGE_LOAN_INTEREST_RATE, RECALCULATE_LOAN_SCHEDULE, GET_LOAN_APPROVAL_CONTEXT, GET_LOAN_APPROVAL_HISTORY } from "@/lib/graphql/queries";
+import { LoanApprovalContext, LoanApprovalHistory } from "@/lib/types";
+import { ArrowLeft, DollarSign, Calendar, AlertCircle, ChevronLeft, ChevronRight, Receipt, CheckCircle, Banknote, UserPlus, Shield, Plus, ShieldAlert } from "lucide-react";
+import CreditScoreGauge from "@/components/CreditScoreGauge";
+import ScoreBreakdownChart from "@/components/ScoreBreakdownChart";
 import Link from "next/link";
 import { formatCurrency, formatDate, getStatusColor } from "@/lib/utils";
 import ErrorDisplay from "@/components/ui/ErrorDisplay";
@@ -27,6 +30,18 @@ export default function LoanAccountDetailPage() {
   const { data: txnData, loading: txnLoading } = useQuery(GET_LOAN_TRANSACTIONS, {
     variables: { loanId: id },
   });
+
+  const { data: approvalCtxData } = useQuery(GET_LOAN_APPROVAL_CONTEXT, {
+    variables: { loanId: id },
+    skip: !data?.loanAccount || data.loanAccount.status !== "APPLIED",
+  });
+  const approvalCtx: LoanApprovalContext | null = approvalCtxData?.loanApprovalContext || null;
+
+  const { data: approvalHistData } = useQuery(GET_LOAN_APPROVAL_HISTORY, {
+    variables: { loanId: id },
+    skip: !data?.loanAccount,
+  });
+  const approvalHistory: LoanApprovalHistory[] = approvalHistData?.loanApprovalHistory || [];
 
   const refetchAll = [
     { query: GET_LOAN_ACCOUNT, variables: { id } },
@@ -386,7 +401,37 @@ export default function LoanAccountDetailPage() {
             {loan.daysInArrears} days overdue
           </span>
         )}
+        {loan.autoApproved && (
+          <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-success/10 text-success border border-success/20">
+            <CheckCircle className="w-3 h-3" />
+            Auto-Approved
+          </span>
+        )}
       </div>
+
+      {/* Approval History Timeline */}
+      {approvalHistory.length > 0 && (
+        <div className="bg-card border border-border rounded-xl p-5">
+          <h3 className="text-sm font-semibold text-foreground mb-3">Approval Timeline</h3>
+          <div className="flex items-center gap-3 overflow-x-auto pb-2">
+            {approvalHistory.map((h, i) => (
+              <div key={h.id} className="flex items-center gap-2 shrink-0">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                  h.action === "AUTO_APPROVED" || h.action === "APPROVED" ? "bg-success" :
+                  h.action === "REJECTED" ? "bg-destructive" : "bg-amber-500"
+                }`}>
+                  {h.approvalLevel}
+                </div>
+                <div className="text-xs">
+                  <div className="font-medium">{h.action.replace(/_/g, " ")}</div>
+                  {h.approvedBy && <div className="text-muted-foreground">{h.approvedBy.fullName || h.approvedBy.username}</div>}
+                </div>
+                {i < approvalHistory.length - 1 && <div className="w-8 h-0.5 bg-border" />}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Loan Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -438,6 +483,75 @@ export default function LoanAccountDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Credit Risk Assessment - for APPLIED loans */}
+      {loan.status === "APPLIED" && approvalCtx && (
+        <div className={`bg-card rounded-xl border p-6 ${
+          approvalCtx.creditScore?.riskLevel === "VERY_HIGH" ? "border-red-300 dark:border-red-800" :
+          approvalCtx.creditScore?.riskLevel === "HIGH" ? "border-amber-300 dark:border-amber-800" :
+          "border-border"
+        }`}>
+          <div className="flex items-center gap-2 mb-4">
+            <ShieldAlert className="w-5 h-5 text-primary" />
+            <h2 className="text-base font-semibold text-foreground">Credit Risk Assessment</h2>
+            {approvalCtx.requiresManualReview && (
+              <span className="ml-auto px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                Manual Review Required
+              </span>
+            )}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="flex justify-center">
+              <CreditScoreGauge
+                score={approvalCtx.creditScore.score}
+                rating={approvalCtx.creditScore.rating}
+                riskLevel={approvalCtx.creditScore.riskLevel}
+                trend={approvalCtx.creditScore.trend || undefined}
+                trendDelta={approvalCtx.creditScore.trendDelta || undefined}
+              />
+            </div>
+            <div>
+              <ScoreBreakdownChart
+                transactionBehaviorScore={approvalCtx.creditScore.transactionBehaviorScore}
+                savingsBehaviorScore={approvalCtx.creditScore.savingsBehaviorScore}
+                loanHistoryScore={approvalCtx.creditScore.loanHistoryScore}
+                financialStabilityScore={approvalCtx.creditScore.financialStabilityScore}
+                memberProfileScore={approvalCtx.creditScore.memberProfileScore}
+              />
+            </div>
+            <div className="space-y-3">
+              {approvalCtx.riskRecommendation && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Recommendation</p>
+                  <p className="text-sm text-foreground">{approvalCtx.riskRecommendation}</p>
+                </div>
+              )}
+              {approvalCtx.maxLoanAmount && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Max Loan Amount</p>
+                  <p className="text-sm font-semibold text-foreground">{formatCurrency(approvalCtx.maxLoanAmount)}</p>
+                </div>
+              )}
+              {approvalCtx.activeAlerts && approvalCtx.activeAlerts.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Active Alerts</p>
+                  <div className="flex flex-wrap gap-1">
+                    {approvalCtx.activeAlerts.map((a) => (
+                      <span key={a.id} className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        a.severity === "CRITICAL"
+                          ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                          : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                      }`}>
+                        {a.alertType.replace(/_/g, " ")}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Loan Details */}
       <div className="bg-card rounded-xl border border-border p-6">

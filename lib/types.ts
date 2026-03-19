@@ -57,10 +57,12 @@ export enum AccountStatus {
 
 export enum LoanStatus {
   APPLIED = "APPLIED",
+  PENDING_REVIEW = "PENDING_REVIEW",
   APPROVED = "APPROVED",
   DISBURSED = "DISBURSED",
   ACTIVE = "ACTIVE",
   CLOSED = "CLOSED",
+  DEFAULTED = "DEFAULTED",
   WRITTEN_OFF = "WRITTEN_OFF",
   REJECTED = "REJECTED",
 }
@@ -388,6 +390,7 @@ export interface Member {
   signaturePath?: string;
   fingerprintPath?: string;
   shares?: number;
+  tinNumber?: string;
   taxExempt?: boolean;
   branch: Branch;
   savingsAccounts?: SavingsAccount[];
@@ -586,10 +589,24 @@ export interface LoanAccount {
   scheduleType?: LoanScheduleType;
   groupLoanType?: GroupLoanType;
   loanGroup?: LoanGroup;
+  approvalLevel?: number;
+  autoApproved?: boolean;
+  approvalHistory?: LoanApprovalHistory[];
   guarantors?: Guarantor[];
   collateral?: Collateral[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface LoanApprovalHistory {
+  id: string;
+  approvalLevel: number;
+  action: string;
+  approvedBy?: { id: string; username: string; fullName: string };
+  comments?: string;
+  riskLevel?: string;
+  creditScore?: number;
+  createdAt: string;
 }
 
 export interface LoanGroup {
@@ -731,6 +748,7 @@ export interface CreateMemberInput {
   nextOfKinName: string;
   nextOfKinPhone: string;
   nextOfKinRelationship: string;
+  tinNumber?: string;
   branchId?: string;
   photoPath?: string;
   signaturePath?: string;
@@ -1418,6 +1436,95 @@ export interface CreditScoreResult {
   calculatedAt?: string;
 }
 
+// Enhanced Credit Scoring
+export interface EnhancedCreditScore {
+  id: string;
+  member: Member;
+  score: number;
+  rating: string;
+  riskLevel: string;
+  recommendation?: string;
+  transactionBehaviorScore: number;
+  savingsBehaviorScore: number;
+  loanHistoryScore: number;
+  financialStabilityScore: number;
+  memberProfileScore: number;
+  scoreBreakdown?: Record<string, unknown>;
+  riskFlags?: string[];
+  trend?: string;
+  trendDelta?: number;
+  previousScore?: number;
+  scoringModelVersion?: string;
+  calculatedAt?: string;
+}
+
+export interface ScoreHistoryEntry {
+  score: number;
+  rating: string;
+  riskLevel?: string;
+  calculatedAt: string;
+}
+
+export interface ScoreTrendAnalysis {
+  currentScore: number;
+  trend?: string;
+  trendDelta?: number;
+  averageScore: number;
+  highestScore: number;
+  lowestScore: number;
+  scores: ScoreHistoryEntry[];
+}
+
+export interface RiskAlert {
+  id: string;
+  member: Member;
+  alertType: string;
+  severity: string;
+  alertCategory?: string;
+  message: string;
+  details?: Record<string, unknown>;
+  relatedTransactionId?: string;
+  relatedUserId?: string;
+  isResolved: boolean;
+  resolvedBy?: string;
+  resolvedAt?: string;
+  createdAt: string;
+}
+
+export interface RiskAlertPage {
+  content: RiskAlert[];
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface LoanApprovalContext {
+  creditScore: EnhancedCreditScore;
+  eligible: boolean;
+  maxLoanAmount?: number;
+  activeAlerts: RiskAlert[];
+  riskRecommendation?: string;
+  requiresManualReview: boolean;
+}
+
+export interface RiskDashboard {
+  totalMembers: number;
+  scoredMembers: number;
+  averageScore: number;
+  riskDistribution: Record<string, number>;
+  criticalAlerts: number;
+  warningAlerts: number;
+}
+
+export interface ScoringWeightConfig {
+  id: string;
+  configName: string;
+  weights: Record<string, unknown>;
+  isActive: boolean;
+  createdBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // Dividends
 export interface DividendRun {
   id: string;
@@ -2046,4 +2153,59 @@ export interface TCDCComplianceReport {
 export interface TwoFactorSetup {
   secret: string;
   otpAuthUri: string;
+}
+
+// ===== Fraud Detection =====
+export interface FraudInvestigation {
+  id: string;
+  riskAlert: RiskAlert;
+  status: string;
+  assignedTo?: { id: string; username: string; fullName: string };
+  investigationNotes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface FraudInvestigationPage {
+  content: FraudInvestigation[];
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface FraudDashboardStats {
+  totalFraudAlerts: number;
+  unresolvedFraudAlerts: number;
+  openInvestigations: number;
+  transactionAlerts: number;
+  accountAlerts: number;
+  internalAlerts: number;
+}
+
+// Loan Overdue Reminders
+export interface LoanReminderLog {
+  id: string;
+  loanAccount?: LoanAccount;
+  member?: { id: string; firstName: string; lastName: string };
+  reminderType: string;
+  escalationLevel: number;
+  channel: string;
+  recipientPhone?: string;
+  recipientEmail?: string;
+  message?: string;
+  sentAt: string;
+  daysInArrearsAtSend: number;
+}
+
+export interface LoanReminderLogPage {
+  content: LoanReminderLog[];
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface LoanEscalationSummary {
+  totalOverdue: number;
+  remindersToday: number;
+  guarantorNoticesToday: number;
+  defaultedThisMonth: number;
+  upcomingPayments: number;
 }

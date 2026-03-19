@@ -91,6 +91,7 @@ export const GET_MEMBER = gql`
       status
       stage
       shares
+      tinNumber
       photoPath
       signaturePath
       fingerprintPath
@@ -185,6 +186,7 @@ export const CREATE_MEMBER = gql`
       lastName
       phoneNumber
       email
+      tinNumber
       status
     }
   }
@@ -199,6 +201,7 @@ export const UPDATE_MEMBER = gql`
       lastName
       phoneNumber
       email
+      tinNumber
       status
     }
   }
@@ -3802,6 +3805,213 @@ export const CALCULATE_CREDIT_SCORE = gql`
   }
 `;
 
+// ===== Enhanced Credit Scoring & Risk =====
+
+const ENHANCED_SCORE_FIELDS = `
+  id score rating riskLevel recommendation
+  transactionBehaviorScore savingsBehaviorScore loanHistoryScore
+  financialStabilityScore memberProfileScore
+  scoreBreakdown riskFlags trend trendDelta previousScore
+  scoringModelVersion calculatedAt
+  member { id memberNumber firstName lastName }
+`;
+
+export const GET_ENHANCED_CREDIT_SCORE = gql`
+  query GetEnhancedCreditScore($memberId: ID!) {
+    enhancedCreditScore(memberId: $memberId) {
+      ${ENHANCED_SCORE_FIELDS}
+    }
+  }
+`;
+
+export const CALCULATE_ENHANCED_CREDIT_SCORE = gql`
+  mutation CalculateEnhancedCreditScore($memberId: ID!) {
+    calculateEnhancedCreditScore(memberId: $memberId) {
+      ${ENHANCED_SCORE_FIELDS}
+    }
+  }
+`;
+
+export const GET_SCORE_HISTORY = gql`
+  query GetScoreHistory($memberId: ID!, $limit: Int) {
+    scoreHistory(memberId: $memberId, limit: $limit) {
+      score rating riskLevel calculatedAt
+    }
+  }
+`;
+
+export const GET_SCORE_TREND_ANALYSIS = gql`
+  query GetScoreTrendAnalysis($memberId: ID!) {
+    scoreTrendAnalysis(memberId: $memberId) {
+      currentScore trend trendDelta averageScore highestScore lowestScore
+      scores { score rating riskLevel calculatedAt }
+    }
+  }
+`;
+
+export const GET_LOAN_APPROVAL_CONTEXT = gql`
+  query GetLoanApprovalContext($loanId: ID!) {
+    loanApprovalContext(loanId: $loanId) {
+      creditScore { ${ENHANCED_SCORE_FIELDS} }
+      eligible maxLoanAmount riskRecommendation requiresManualReview
+      activeAlerts { id alertType severity message createdAt }
+    }
+  }
+`;
+
+export const GET_RISK_ALERTS = gql`
+  query GetRiskAlerts($page: Int, $size: Int) {
+    riskAlerts(page: $page, size: $size) {
+      content {
+        id alertType severity message details isResolved
+        resolvedBy resolvedAt createdAt
+        member { id memberNumber firstName lastName }
+      }
+      totalElements totalPages
+    }
+  }
+`;
+
+export const GET_MEMBER_RISK_ALERTS = gql`
+  query GetMemberRiskAlerts($memberId: ID!) {
+    memberRiskAlerts(memberId: $memberId) {
+      id alertType severity message details isResolved createdAt
+    }
+  }
+`;
+
+export const RESOLVE_RISK_ALERT = gql`
+  mutation ResolveRiskAlert($alertId: ID!) {
+    resolveRiskAlert(alertId: $alertId) {
+      id isResolved resolvedBy resolvedAt
+    }
+  }
+`;
+
+export const GET_RISK_DASHBOARD = gql`
+  query GetRiskDashboard {
+    riskDashboard {
+      totalMembers scoredMembers averageScore
+      riskDistribution criticalAlerts warningAlerts
+    }
+  }
+`;
+
+export const GET_ACTIVE_SCORING_CONFIG = gql`
+  query GetActiveScoringConfig {
+    activeScoringConfig {
+      id configName weights isActive createdBy createdAt updatedAt
+    }
+  }
+`;
+
+export const UPDATE_SCORING_WEIGHTS = gql`
+  mutation UpdateScoringWeights($configName: String!, $weights: JSON!) {
+    updateScoringWeights(configName: $configName, weights: $weights) {
+      id configName weights isActive updatedAt
+    }
+  }
+`;
+
+export const BATCH_RECALCULATE_SCORES = gql`
+  mutation BatchRecalculateScores {
+    batchRecalculateScores
+  }
+`;
+
+// ===== Loan Approval Workflow =====
+export const GET_PENDING_REVIEW_LOANS = gql`
+  query GetPendingReviewLoans($page: Int, $size: Int) {
+    pendingReviewLoans(page: $page, size: $size) {
+      content {
+        id loanNumber principalAmount interestRate termMonths status
+        applicationDate autoApproved approvalLevel
+        member { id memberNumber firstName lastName }
+        product { id productName }
+        branch { id branchName }
+      }
+      totalElements totalPages
+    }
+  }
+`;
+
+export const GET_LOAN_APPROVAL_HISTORY = gql`
+  query GetLoanApprovalHistory($loanId: ID!) {
+    loanApprovalHistory(loanId: $loanId) {
+      id approvalLevel action comments riskLevel creditScore createdAt
+      approvedBy { id username fullName }
+    }
+  }
+`;
+
+export const LOAN_OFFICER_APPROVAL = gql`
+  mutation LoanOfficerApproval($loanId: ID!, $approved: Boolean!, $approvedAmount: Decimal, $comments: String) {
+    loanOfficerApproval(loanId: $loanId, approved: $approved, approvedAmount: $approvedAmount, comments: $comments) {
+      id loanNumber status approvalLevel
+    }
+  }
+`;
+
+export const MANAGER_APPROVAL = gql`
+  mutation ManagerApproval($loanId: ID!, $approved: Boolean!, $approvedAmount: Decimal, $comments: String) {
+    managerApproval(loanId: $loanId, approved: $approved, approvedAmount: $approvedAmount, comments: $comments) {
+      id loanNumber status approvalLevel
+    }
+  }
+`;
+
+// ===== Fraud Detection =====
+export const GET_FRAUD_DASHBOARD_STATS = gql`
+  query GetFraudDashboardStats {
+    fraudDashboardStats {
+      totalFraudAlerts unresolvedFraudAlerts openInvestigations
+      transactionAlerts accountAlerts internalAlerts
+    }
+  }
+`;
+
+export const GET_FRAUD_ALERTS = gql`
+  query GetFraudAlerts($category: String, $page: Int, $size: Int) {
+    fraudAlerts(category: $category, page: $page, size: $size) {
+      content {
+        id alertType severity alertCategory message details
+        relatedTransactionId relatedUserId isResolved resolvedBy resolvedAt createdAt
+        member { id memberNumber firstName lastName }
+      }
+      totalElements totalPages
+    }
+  }
+`;
+
+export const GET_FRAUD_INVESTIGATIONS = gql`
+  query GetFraudInvestigations($status: String, $page: Int, $size: Int) {
+    fraudInvestigations(status: $status, page: $page, size: $size) {
+      content {
+        id status investigationNotes createdAt updatedAt
+        riskAlert { id alertType severity message member { id memberNumber firstName lastName } }
+        assignedTo { id username fullName }
+      }
+      totalElements totalPages
+    }
+  }
+`;
+
+export const OPEN_FRAUD_INVESTIGATION = gql`
+  mutation OpenFraudInvestigation($alertId: ID!, $assignedToUserId: ID!) {
+    openFraudInvestigation(alertId: $alertId, assignedToUserId: $assignedToUserId) {
+      id status
+    }
+  }
+`;
+
+export const UPDATE_FRAUD_INVESTIGATION = gql`
+  mutation UpdateFraudInvestigation($investigationId: ID!, $status: String!, $notes: String) {
+    updateFraudInvestigation(investigationId: $investigationId, status: $status, notes: $notes) {
+      id status investigationNotes
+    }
+  }
+`;
+
 // ===== Dividends (Legacy) =====
 export const GET_DIVIDEND_RUNS = gql`
   query GetDividendRuns {
@@ -3983,6 +4193,57 @@ export const GET_DEPOSIT_MATURITY_SCHEDULE = gql`
     depositMaturitySchedule(date: $date, branchId: $branchId) {
       bucket totalAmount count
     }
+  }
+`;
+
+// ===== Loan Overdue Reminders =====
+export const GET_OVERDUE_LOANS = gql`
+  query GetOverdueLoans($page: Int, $size: Int) {
+    overdueLoans(page: $page, size: $size) {
+      content {
+        id loanNumber principalAmount outstandingPrincipal outstandingInterest
+        outstandingPenalties outstandingFees daysInArrears status nextPaymentDate
+        member { id memberNumber firstName lastName phoneNumber }
+        product { id productName }
+        branch { id branchName }
+      }
+      totalElements totalPages
+    }
+  }
+`;
+
+export const GET_LOAN_ESCALATION_SUMMARY = gql`
+  query GetLoanEscalationSummary {
+    loanEscalationSummary {
+      totalOverdue remindersToday guarantorNoticesToday defaultedThisMonth upcomingPayments
+    }
+  }
+`;
+
+export const GET_LOAN_REMINDER_LOGS = gql`
+  query GetLoanReminderLogs($loanId: ID!, $page: Int, $size: Int) {
+    loanReminderLogs(loanId: $loanId, page: $page, size: $size) {
+      content {
+        id reminderType escalationLevel channel recipientPhone recipientEmail
+        message sentAt daysInArrearsAtSend
+        member { id firstName lastName }
+      }
+      totalElements totalPages
+    }
+  }
+`;
+
+export const SEND_MANUAL_REMINDER = gql`
+  mutation SendManualReminder($loanId: ID!, $message: String) {
+    sendManualReminder(loanId: $loanId, message: $message) {
+      id reminderType channel message sentAt
+    }
+  }
+`;
+
+export const RUN_OVERDUE_REMINDERS = gql`
+  mutation RunOverdueReminders {
+    runOverdueReminders
   }
 `;
 

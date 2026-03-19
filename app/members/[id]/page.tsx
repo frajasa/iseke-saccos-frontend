@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { GET_MEMBER, GET_MEMBERS, DELETE_MEMBER, GET_MEMBER_SAVINGS_ACCOUNTS, GET_MEMBER_LOAN_ACCOUNTS } from "@/lib/graphql/queries";
-import { Member } from "@/lib/types";
+import { GET_MEMBER, GET_MEMBERS, DELETE_MEMBER, GET_MEMBER_SAVINGS_ACCOUNTS, GET_MEMBER_LOAN_ACCOUNTS, GET_ENHANCED_CREDIT_SCORE, CALCULATE_ENHANCED_CREDIT_SCORE, GET_MEMBER_RISK_ALERTS } from "@/lib/graphql/queries";
+import { Member, EnhancedCreditScore, RiskAlert } from "@/lib/types";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Edit, Trash2, Mail, Phone, MapPin, Briefcase, DollarSign, User, Calendar, AlertCircle, TrendingUp, Coins } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Mail, Phone, MapPin, Briefcase, DollarSign, User, Calendar, AlertCircle, TrendingUp, Coins, RefreshCw, Loader2, ShieldCheck } from "lucide-react";
+import CreditScoreGauge from "@/components/CreditScoreGauge";
+import ScoreBreakdownChart from "@/components/ScoreBreakdownChart";
 
 import Link from "next/link";
 import { toast } from "sonner";
@@ -33,6 +35,22 @@ export default function MemberDetailPage() {
     variables: { memberId },
     fetchPolicy: 'network-only',
     errorPolicy: 'all',
+  });
+
+  const { data: creditData, refetch: refetchCredit } = useQuery(GET_ENHANCED_CREDIT_SCORE, {
+    variables: { memberId },
+    errorPolicy: "all",
+  });
+  const { data: alertsData } = useQuery(GET_MEMBER_RISK_ALERTS, {
+    variables: { memberId },
+    errorPolicy: "all",
+  });
+  const [calcScore, { loading: calcLoading }] = useMutation(CALCULATE_ENHANCED_CREDIT_SCORE, {
+    onCompleted: () => {
+      toast.success("Credit score recalculated");
+      refetchCredit();
+    },
+    onError: (err) => toast.error(err.message),
   });
 
   const [deleteMember, { loading: deleteLoading }] = useMutation(DELETE_MEMBER, {
@@ -287,6 +305,74 @@ export default function MemberDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Credit Score */}
+      <div className="bg-card rounded-xl border border-border p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-primary" />
+            <h2 className="text-base font-semibold text-foreground">Credit Score</h2>
+          </div>
+          <button
+            onClick={() => calcScore({ variables: { memberId } })}
+            disabled={calcLoading}
+            className="px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors text-xs font-medium disabled:opacity-50 flex items-center gap-1.5"
+          >
+            {calcLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+            {calcLoading ? "Calculating..." : "Recalculate"}
+          </button>
+        </div>
+        {creditData?.enhancedCreditScore ? (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="flex justify-center">
+              <CreditScoreGauge
+                score={creditData.enhancedCreditScore.score}
+                rating={creditData.enhancedCreditScore.rating}
+                riskLevel={creditData.enhancedCreditScore.riskLevel}
+                trend={creditData.enhancedCreditScore.trend || undefined}
+                trendDelta={creditData.enhancedCreditScore.trendDelta || undefined}
+              />
+            </div>
+            <div>
+              <ScoreBreakdownChart
+                transactionBehaviorScore={creditData.enhancedCreditScore.transactionBehaviorScore}
+                savingsBehaviorScore={creditData.enhancedCreditScore.savingsBehaviorScore}
+                loanHistoryScore={creditData.enhancedCreditScore.loanHistoryScore}
+                financialStabilityScore={creditData.enhancedCreditScore.financialStabilityScore}
+                memberProfileScore={creditData.enhancedCreditScore.memberProfileScore}
+              />
+            </div>
+            <div className="space-y-3">
+              {creditData.enhancedCreditScore.recommendation && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Recommendation</p>
+                  <p className="text-sm text-foreground">{creditData.enhancedCreditScore.recommendation}</p>
+                </div>
+              )}
+              {alertsData?.memberRiskAlerts?.length > 0 && (
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Active Alerts</p>
+                  <div className="flex flex-wrap gap-1">
+                    {alertsData.memberRiskAlerts.slice(0, 5).map((a: RiskAlert) => (
+                      <span key={a.id} className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        a.severity === "CRITICAL"
+                          ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                          : "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                      }`}>
+                        {a.alertType.replace(/_/g, " ")}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground text-center py-4">
+            No credit score available. Click &quot;Recalculate&quot; to generate one.
+          </p>
+        )}
+      </div>
 
       {/* Next of Kin Information */}
       <div className="bg-card rounded-xl border border-border p-6">

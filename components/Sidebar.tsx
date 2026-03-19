@@ -43,7 +43,7 @@ import {
   GitBranch,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Shield, Package, PieChart, Target, UserPlus, BarChart3, ShieldPlus, FormInput, Landmark, Award, Fingerprint } from "lucide-react";
+import { Shield, Package, PieChart, Target, UserPlus, BarChart3, ShieldPlus, FormInput, Landmark, Award, Fingerprint, AlertTriangle, ShieldAlert, ClipboardCheck, Search } from "lucide-react";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 // Each nav item requires at least one of the listed permissions to be visible
@@ -100,6 +100,14 @@ const navigation = [
       { name: "Petty Cash", href: "/dashboard/petty-cash", icon: Coins, permissions: ["VIEW_ACCOUNTING", "MANAGE_ACCOUNTING"], roles: ["ADMIN", "MANAGER", "ACCOUNTANT", "CASHIER"] },
       { name: "Board Members", href: "/dashboard/board-members", icon: Landmark, permissions: ["MANAGE_SETTINGS"], roles: ["ADMIN", "MANAGER"] },
       { name: "Credit Scoring", href: "/dashboard/credit-scoring", icon: Award, permissions: ["VIEW_MEMBERS", "VIEW_LOANS"], roles: ["ADMIN", "MANAGER", "LOAN_OFFICER"] },
+      { name: "Risk Dashboard", href: "/dashboard/risk", icon: ShieldCheck, permissions: ["VIEW_MEMBERS", "VIEW_LOANS"], roles: ["ADMIN", "MANAGER", "LOAN_OFFICER"] },
+      { name: "Risk Alerts", href: "/dashboard/risk/alerts", icon: AlertTriangle, permissions: ["VIEW_MEMBERS", "VIEW_LOANS"], roles: ["ADMIN", "MANAGER", "LOAN_OFFICER"] },
+      { name: "Scoring Config", href: "/dashboard/risk/scoring-config", icon: Settings, permissions: ["MANAGE_SETTINGS"], roles: ["ADMIN"] },
+      { name: "Loan Approvals", href: "/dashboard/loan-approvals", icon: ClipboardCheck, permissions: ["VIEW_LOANS", "APPROVE_LOANS"], roles: ["ADMIN", "MANAGER", "LOAN_OFFICER"] },
+      { name: "Overdue Loans", href: "/dashboard/overdue-loans", icon: AlertTriangle, permissions: ["VIEW_LOANS"], roles: ["ADMIN", "MANAGER", "LOAN_OFFICER", "CASHIER"] },
+      { name: "Fraud Dashboard", href: "/dashboard/fraud", icon: ShieldAlert, permissions: ["VIEW_MEMBERS"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Fraud Alerts", href: "/dashboard/fraud/alerts", icon: AlertTriangle, permissions: ["VIEW_MEMBERS"], roles: ["ADMIN", "MANAGER"] },
+      { name: "Investigations", href: "/dashboard/fraud/investigations", icon: Search, permissions: ["VIEW_MEMBERS"], roles: ["ADMIN", "MANAGER"] },
       { name: "Security (2FA)", href: "/dashboard/security", icon: Fingerprint, permissions: [], roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER", "ACCOUNTANT"] },
       { name: "Settings", href: "/dashboard/settings", icon: Settings, permissions: ["MANAGE_SETTINGS"], roles: ["ADMIN"] },
       { name: "Change Password", href: "/dashboard/change-password", icon: Lock, permissions: [], roles: ["ADMIN", "MANAGER", "CASHIER", "LOAN_OFFICER", "ACCOUNTANT"] },

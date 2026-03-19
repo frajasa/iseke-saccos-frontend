@@ -82,6 +82,7 @@ export function calculateAge(dateOfBirth: string | Date): number {
 export function getStatusColor(status: string): string {
   const statusColors: Record<string, string> = {
     APPLIED: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+    PENDING_REVIEW: "bg-orange-500/10 text-orange-600 border-orange-500/20",
     ACTIVE: "bg-success/10 text-success border-success/20",
     INACTIVE: "bg-muted text-muted-foreground border-border",
     SUSPENDED: "bg-destructive/10 text-destructive border-destructive/20",
@@ -92,6 +93,7 @@ export function getStatusColor(status: string): string {
     DISBURSED: "bg-purple-500/10 text-purple-600 border-purple-500/20",
     CLOSED: "bg-muted text-muted-foreground border-border",
     WRITTEN_OFF: "bg-destructive/10 text-destructive border-destructive/20",
+    DEFAULTED: "bg-red-600/10 text-red-700 border-red-600/20",
     REJECTED: "bg-destructive/10 text-destructive border-destructive/20",
     OVERDUE: "bg-red-500/10 text-red-600 border-red-500/20",
     PAID: "bg-success/10 text-success border-success/20",
